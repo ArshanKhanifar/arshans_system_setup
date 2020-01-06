@@ -1,0 +1,65 @@
+{
+    "workbench.editor.limit.enabled": true,
+    "workbench.editor.limit.value": 4,
+    "window.zoomLevel": 0,
+    "files.exclude": {
+        "**/*.js": { "when": "$(basename).ts" }
+    },
+    "extensions.ignoreRecommendations": true,
+    "vim.insertModeKeyBindings": [
+        {
+          "before": ["j", "k"],
+          "after": ["<Esc>"]
+        }
+    ],
+    "vim.useSystemClipboard": true,
+    "vim.hlsearch": true,
+    "vim.leader": ",",
+    "vim.useCtrlKeys": true,
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": ["<C-h>"],
+            "commands": [
+                "workbench.action.navigateLeft"
+            ]
+        },
+        {
+            "before": ["<C-l>"],
+            "commands": [
+                "workbench.action.navigateRight"
+            ]
+        },
+        {
+            "before": ["<C-k>"],
+            "commands": [
+                "workbench.action.navigateUp"
+            ]
+        },
+        {
+            "before": ["<C-j>"],
+            "commands": [
+                "workbench.action.navigateDown"
+            ]
+        },
+        {
+            "before": ["<leader>", "v"],
+            "commands": [
+                "workbench.action.splitEditor"
+            ]
+        },
+        {
+            "before": ["<leader>", "s"],
+            "commands": [
+                "workbench.action.splitEditorOrthogonal"
+            ]
+        },
+        {
+            "before": ["<leader>", "t"],
+            "commands": [
+                "workbench.action.quickOpen"
+            ]
+        }
+    ],
+    "C_Cpp.updateChannel": "Insiders",
+    "editor.tabSize": 2
+}
