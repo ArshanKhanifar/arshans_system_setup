@@ -5,6 +5,15 @@ This documentation lists out all of Arshan's favourite tools on MacOS.
 ## iTerm2
 * [cheatsheet](https://gist.github.com/squarism/ae3613daf5c01a98ba3a)
 
+### Custom Shortcuts
+* Go to `Preferences > Keys`
+* Add these shortcuts
+.. * ctrl j -> Select pane on the bottom
+.. * so on and so forth
+
+
+
+
 
 ## ZSH
 
