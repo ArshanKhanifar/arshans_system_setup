@@ -7,7 +7,7 @@ NOPLUGINS_VIMRC="no_plugins.vimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
 
 # install zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sed 's:env zsh -l::g' | sed 's:chsh -s .*$::g')"
 
 # clone this repo:
 cd ~
