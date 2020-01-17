@@ -1,4 +1,4 @@
-# rc_files
+# Arshan's System Setup
 This repo contains the rc files that I use with my machines. Contains Vim shortcuts, tmux shortcuts, etc.
 
 ## NEW! Automated Mac OSX Script: 
