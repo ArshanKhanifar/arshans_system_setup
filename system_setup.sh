@@ -7,7 +7,11 @@ NOPLUGINS_VIMRC="no_plugins.vimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
 
 # install zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sed 's:env zsh -l::g' | sed 's:chsh -s .*$::g')"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
+# install fzf
+git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+~/.fzf/install --all
 
 # clone this repo:
 cd ~
@@ -23,4 +27,5 @@ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 echo "source ~/${REPO_NAME}/${VUNDLE_PLUGINS}" >> ~/.vimrc
 vim +PluginInstall +qall
 
-
+##### password-requiring commands
+chsh -s $(which zsh)
