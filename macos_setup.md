@@ -1,0 +1,22 @@
+# Arshan's MacOS Setup
+This documentation lists out all of Arshan's favourite tools on MacOS.
+
+
+## iTerm2
+* [cheatsheet](https://gist.github.com/squarism/ae3613daf5c01a98ba3a)
+
+
+## ZSH
+
+* May have to accept some X-Code terms before being able to install git. 
+
+```
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+* Will have to accept two things, TODO: see if you can automate this. 
+
+## FZF
+This badboy is necessary 😩.
+
+
+
