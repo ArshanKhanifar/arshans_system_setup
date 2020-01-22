@@ -6,6 +6,7 @@ REPO_NAME="arshans_system_setup"
 NOPLUGINS_VIMRC="no_plugins.vimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
 PLUG_PLUGINS="plug.vim"
+SHELL_RC_FILE=".zshrc"
 
 # install zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
@@ -30,3 +31,13 @@ vim +'PlugInstall --sync' +qa
 
 ##### password-requiring commands
 chsh -s $(which zsh)
+
+# install homebrew
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+# brew installations
+brew install ctags
+
+alias ctags="`brew --prefix`/bin/ctags"
+alias ctags >> ~/$SHELL_RC_FILE
+
