@@ -21,14 +21,14 @@ case "${unameOut}" in
 esac
 
 # install zsh
-#if [ -z "$(which zsh)" ]; then
-#  if [ "${machine}" = "${MACHINE_LINUX}" ]; then
-#    sudo apt install git-core zsh
-#  else 
-#    echo "Zsh not installed, please install it before running this script."
-#    exit 1
-#  fi
-#fi
+if [ -z "$(which zsh)" ]; then
+  if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+    sudo apt install git-core zsh
+  else 
+    echo "Zsh not installed, please install it before running this script."
+    exit 1
+  fi
+fi
 
 # install oh-my-zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended

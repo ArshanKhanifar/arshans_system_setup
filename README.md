@@ -11,7 +11,7 @@ Installs
 * my vim.plug plugins
 
 ```
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/system_setup.sh)" 
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/system_setup.sh)" 
 ```
 
 
