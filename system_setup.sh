@@ -27,6 +27,7 @@ if [ -z "$(which zsh)" ]; then
   else 
     echo "Zsh not installed, please install it before running this script."
     exit 1
+  fi
 fi
 
 # install oh-my-zsh
