@@ -11,7 +11,7 @@ syntax on
 colorscheme heman
 
 " column width checking
-set colorcolumn=100
+set colorcolumn=80
 
 " Spell checking
 set spell spelllang=en_ca
