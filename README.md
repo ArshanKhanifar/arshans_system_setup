@@ -1,6 +1,12 @@
 # Arshan's System Setup
 This repo contains the rc files that I use with my machines. Contains Vim shortcuts, tmux shortcuts, etc.
 
+## Ubuntu Pre-requisites
+I forgot vanilla Ubuntu misses `git` and `curl`!
+```
+sudo apt install git curl
+```
+
 ## NEW! Automated Mac OSX Script: 
 Installs
 * oh_my_zsh
