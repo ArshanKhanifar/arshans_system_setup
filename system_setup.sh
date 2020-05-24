@@ -33,6 +33,9 @@ fi
 # install oh-my-zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
+# less permissions on oh-my-zsh
+chmod -R 700 ~/.oh-my-zsh
+
 # clone this repo:
 cd ~
 git clone https://github.com/$USER_NAME/$REPO_NAME
