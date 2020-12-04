@@ -63,7 +63,7 @@ chsh -s $(which zsh)
 
 if [ "${machine}" = "${MACHINE_MAC}" ]; then
   # install homebrew
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
   # brew installations
   brew install ctags
 
