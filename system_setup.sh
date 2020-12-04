@@ -4,6 +4,7 @@ set -eax
 USER_NAME="arshankhanifar"
 REPO_NAME="arshans_system_setup"
 NOPLUGINS_VIMRC="no_plugins.vimrc"
+JETBRAINS_VIMRC="arshan_jetbrains.ideavimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
 PLUG_PLUGINS="plug.vim"
 SHELL_RC_FILE=".zshrc"
@@ -42,6 +43,8 @@ git clone https://github.com/$USER_NAME/$REPO_NAME
 
 # Add shortcuts
 echo "source ~/${REPO_NAME}/${NOPLUGINS_VIMRC}" >> ~/.vimrc
+echo "source ~/${REPO_NAME}/${JETBRAINS_VIMRC}" >> ~/.ideavimrc
+
 
 # install vundle:
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
@@ -65,7 +68,7 @@ if [ "${machine}" = "${MACHINE_MAC}" ]; then
   # install homebrew
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
   # brew installations
-  brew install ctags
+  brew install ctags the_silver_searcher
 
   alias ctags="`brew --prefix`/bin/ctags"
   alias ctags >> ~/$SHELL_RC_FILE
