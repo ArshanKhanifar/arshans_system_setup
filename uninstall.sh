@@ -1,4 +1,6 @@
 rm -rf ~/.vimrc
 rm -rf ~/.vim/bundle/*
+bash ~/.fzf/uninstall
+bash ~/.oh-my-zsh/tools/uninstall.sh
+chsh -s $(which bash)
 rm -rf ~/arshans_system_setup
-rm -rf ~/.fzf
