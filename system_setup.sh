@@ -12,6 +12,9 @@ SHELL_RC_FILE=".zshrc"
 MACHINE_MAC="Mac"
 MACHINE_LINUX="Linux"
 
+ARCHITECTURE_ARM64="arm64"
+
+architecture="$(uname -m)"
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     machine=$MACHINE_LINUX;;
@@ -67,7 +70,8 @@ vim +'PlugInstall --sync' +qa
 ##### password-requiring commands
 chsh -s $(which zsh)
 
-if [ "${machine}" = "${MACHINE_MAC}" ]; then
+if [ "${machine}" = "${MACHINE_MAC}" ] &&
+   [ "${architecture}" != "${ARCHITECTURE_ARM64}" ]; then
   # install homebrew
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
   # brew installations
