@@ -66,9 +66,9 @@ vim +'PlugInstall --sync' +qa
 ##### password-requiring commands
 chsh -s $(which zsh)
 
-# install fzf
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install --all
+## install fzf
+#git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+#~/.fzf/install --all
 
 if [ "${machine}" = "${MACHINE_MAC}" ] &&
    [ "${architecture}" != "${ARCHITECTURE_ARM64}" ]; then
