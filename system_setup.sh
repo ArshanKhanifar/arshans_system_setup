@@ -34,10 +34,6 @@ if [ -z "$(which zsh)" ]; then
   fi
 fi
 
-# install fzf
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install --all
-
 # install oh-my-zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
@@ -69,6 +65,10 @@ vim +'PlugInstall --sync' +qa
 
 ##### password-requiring commands
 chsh -s $(which zsh)
+
+# install fzf
+git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+~/.fzf/install --all
 
 if [ "${machine}" = "${MACHINE_MAC}" ] &&
    [ "${architecture}" != "${ARCHITECTURE_ARM64}" ]; then
