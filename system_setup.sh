@@ -28,8 +28,13 @@ esac
 # install zsh
 if [ -z "$(which zsh)" ]; then
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
-    sudo apt install git-core zsh vim
-  else 
+    if [ "${ENVIRONMENT}" = "docker" ]; then
+      apt-get update
+      apt-get install -y git-core zsh vim
+    else
+      sudo apt install -y git-core zsh vim
+    fi
+  else
     echo "Zsh not installed, please install it before running this script."
     exit 1
   fi
