@@ -29,8 +29,20 @@ esac
 if [ -z "$(which zsh)" ]; then
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
     if [ "${ENVIRONMENT}" = "docker" ]; then
-      apt-get update
-      apt-get install -y git-core zsh vim
+      if [ -f "/etc/os-release" ]; then
+        # Detect the Linux distribution
+        source /etc/os-release
+        if [ "${ID}" = "alpine" ]; then
+          apk update
+          apk add --no-cache git zsh vim
+        else
+          apt-get update
+          apt-get install -y git-core zsh vim
+        fi
+      else
+        echo "Unable to determine the Linux distribution. Zsh not installed."
+        exit 1
+      fi
     else
       sudo apt install -y git-core zsh vim
     fi
