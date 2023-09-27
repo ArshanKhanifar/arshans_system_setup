@@ -84,11 +84,12 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 echo "source ~/${REPO_NAME}/${PLUG_PLUGINS}" >> ~/.vimrc
 vim +'PlugInstall --sync' +qa
 
-##### password-requiring commands
-chsh -s $(which zsh)
 
 if [ "${machine}" = "${MACHINE_MAC}" ] &&
    [ "${architecture}" != "${ARCHITECTURE_ARM64}" ]; then
+  ##### password-requiring commands
+  chsh -s $(which zsh)
+  
   # install homebrew
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
   # brew installations
