@@ -32,7 +32,7 @@ if [ -z "$(which zsh)" ]; then
       if [ -f "/etc/os-release" ]; then
         # Detect the Linux distribution
         source /etc/os-release
-        if [ "${ID}" = "ubuntu" ]; then
+        if [ "${ID}" = "alpine" ]; then
           apk update
           apk add --no-cache git zsh vim
         else
