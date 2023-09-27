@@ -32,12 +32,12 @@ if [ -z "$(which zsh)" ]; then
       if [ -f "/etc/os-release" ]; then
         # Detect the Linux distribution
         source /etc/os-release
-        if [ "${ID}" = "alpine" ]; then
-          apk update
-          apk add --no-cache git zsh vim
-        else
+        if [ "${ID}" = "ubuntu" ]; then
           apt-get update
           apt-get install -y git-core zsh vim
+        else
+          apk update
+          apk add --no-cache git zsh vim
         fi
       else
         echo "Unable to determine the Linux distribution. Zsh not installed."
