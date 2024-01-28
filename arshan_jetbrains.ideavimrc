@@ -16,3 +16,5 @@ nnoremap <C-H> <C-W><C-H>
 
 " AppCode: to stop when AutoComplete enters visual mode
 set selectmode=ideaselection
+
+set clipboard^=ideaput

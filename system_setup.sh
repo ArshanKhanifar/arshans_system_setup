@@ -44,7 +44,8 @@ if [ -z "$(which zsh)" ]; then
         exit 1
       fi
     else
-      sudo apt install -y git-core zsh vim
+      sudo apt update
+      sudo apt install -y git zsh vim
     fi
   else
     echo "Zsh not installed, please install it before running this script."
