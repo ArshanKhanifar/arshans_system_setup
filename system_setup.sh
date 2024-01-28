@@ -86,6 +86,12 @@ echo "source ~/${REPO_NAME}/${PLUG_PLUGINS}" >> ~/.vimrc
 vim +'PlugInstall --sync' +qa
 
 ##### password-requiring commands
+# check if INTERACTIVE is set
+if [ -z "${INTERACTIVE}" ]; then
+  echo "INTERACTIVE is not set, skipping password-requiring commands."
+  exit 0
+fi
+
 chsh -s $(which zsh)
 
 if [ "${machine}" = "${MACHINE_MAC}" ] &&

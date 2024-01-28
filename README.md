@@ -7,7 +7,7 @@ I forgot vanilla Ubuntu misses `git` and `curl`!
 sudo apt install git curl
 ```
 
-## Automated Mac OSX Script: 
+## Automated Setup Script: 
 Installs
 * oh_my_zsh
 * fzf
@@ -19,6 +19,11 @@ Installs
 ```
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/system_setup.sh)" 
 ```
+If you want interactive mode (asks for passwords), set the `INTERACTIVE` variable to `true`:
+```
+INTERACTIVE=true bash -c "$(curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/system_setup.sh)" 
+```
+
 
 ### Macbooks with Apple CPU's
 `Homebrew` is not yet supported on ARM macs, so you'd have to install it using Rosetta:
