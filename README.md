@@ -26,6 +26,7 @@ INTERACTIVE=true bash -c "$(curl -fsSL https://raw.githubusercontent.com/ArshanK
 
 
 ### Macbooks with Apple CPU's
+**Update (2024-04-02):** Homebrew is now supported on mac's so the automated script above should work just fine.
 `Homebrew` is not yet supported on ARM macs, so you'd have to install it using Rosetta:
 ```
 arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
