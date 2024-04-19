@@ -8,6 +8,7 @@ JETBRAINS_VIMRC="arshan_jetbrains.ideavimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
 CUSTOM_VIM="custom.vim"
 PLUG_PLUGINS="plug.vim"
+BYOBU_KEYBINDINGS="keybindings.tmux"
 SHELL_RC_FILE=".zshrc"
 
 MACHINE_MAC="Mac"
@@ -34,10 +35,10 @@ if [ -z "$(which zsh)" ]; then
         source /etc/os-release
         if [ "${ID}" = "alpine" ]; then
           apk update
-          apk add --no-cache git zsh vim
+          apk add --no-cache git zsh vim byobu
         else
           apt-get update
-          apt-get install -y git-core zsh vim
+          apt-get install -y git-core zsh vim byobu
         fi
       else
         echo "Unable to determine the Linux distribution. Zsh not installed."
@@ -45,7 +46,7 @@ if [ -z "$(which zsh)" ]; then
       fi
     else
       sudo apt update
-      sudo apt install -y git zsh vim
+      sudo apt install -y git zsh vim byobu
     fi
   else
     echo "Zsh not installed, please install it before running this script."
@@ -84,6 +85,14 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 # install plug plugins:
 echo "source ~/${REPO_NAME}/${PLUG_PLUGINS}" >> ~/.vimrc
 vim +'PlugInstall --sync' +qa
+
+# set up byobu 
+export BYOBU_BACKEND=tmux
+byobu -S temp_session new-session -d
+byobu kill-session -t temp_session
+
+# byobu keybinding config
+echo "source-file ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.tmux
 
 ##### password-requiring commands
 # check if INTERACTIVE is set
