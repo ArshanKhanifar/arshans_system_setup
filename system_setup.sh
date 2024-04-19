@@ -88,8 +88,12 @@ vim +'PlugInstall --sync' +qa
 
 # set up byobu 
 export BYOBU_BACKEND=tmux
-byobu -S temp_session new-session -d
-byobu kill-session -t temp_session
+# create & kill a session (to create the ~/.byobu directory)
+byobu new-session -d -s temp
+byobu kill-session -t temp
+# select the backend & switch to screen
+byobu-select-backend tmux
+byobu-ctrl-a screen
 
 # byobu keybinding config
 echo "source-file ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.tmux
