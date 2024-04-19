@@ -37,5 +37,17 @@ arch -x86_64 brew install <package>
 ```
 * [source link](https://stackoverflow.com/questions/64882584/how-to-run-the-homebrew-installer-under-rosetta-2-on-m1-macbook)
 
+### Byobu Config
+The configuration currently has the following stuff:
+* `prefix + v` vertical split
+* `prefix + s` horizontal split
+* `ctrl + hjkl` selects panes while respecting vim's panes.
+
+### Byobu Cheatsheet
+* `prefix` is `ctrl a` 
+* **new tab**: `prefix + c`
+* **next tab**: `prefix + n`
+* **previous tab**: `prefix + p`
+* **select between panes**: `ctrl + hkjl`
 
 
