@@ -21,3 +21,7 @@ set clipboard^=ideaput
 
 set textwidth=88
 
+" make all search case insensitive
+set ignorecase
+set smartcase
+

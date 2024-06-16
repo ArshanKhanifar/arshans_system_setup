@@ -28,3 +28,7 @@ nmap <Leader>r :Tags<CR>
 nmap <Leader>a :Ack<CR>
 nmap <Leader>v :vsplit<CR>
 nmap <Leader>s :split<CR>
+
+" make all search case insensitive
+set ignorecase
+set smartcase

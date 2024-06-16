@@ -74,3 +74,8 @@ let g:javascript_plugin_ngdoc = 1
 let g:javascript_plugin_flow = 1
 
 autocmd BufWritePost *.tex silent !{pdflatex *.tex 2>&1 >/dev/null &}
+
+# starlark files (Kurtosis scripts)
+autocmd FileType *.star setlocal filetype=python
+
+
