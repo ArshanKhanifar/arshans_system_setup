@@ -3,6 +3,7 @@ set -eax
 
 USER_NAME="arshankhanifar"
 REPO_NAME="arshans_system_setup"
+RCFILE=".arshrc"
 NOPLUGINS_VIMRC="no_plugins.vimrc"
 JETBRAINS_VIMRC="arshan_jetbrains.ideavimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
@@ -97,6 +98,10 @@ byobu-ctrl-a screen
 
 # byobu keybinding config
 echo "source-file ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.tmux
+
+# general.arshrc commands
+echo "source-file ~/${REPO_NAME}/${RCFILE}" >> ~/.zshrc
+echo "source-file ~/${REPO_NAME}/${RCFILE}" >> ~/.bashrc
 
 ##### password-requiring commands
 # check if INTERACTIVE is set

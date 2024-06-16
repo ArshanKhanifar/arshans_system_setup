@@ -7,11 +7,13 @@ set -g prefix ^A
 set -g prefix2 F12
 bind a send-prefix
 
-# prefix + s gives you split window capability
+# tmux panes 
+# note: definition of "vertical" in tmux is the opposite of vim's
+# and I'm using vim's.
 unbind s
-bind s split-window -h
+bind s split-window -v
 unbind v
-bind v split-window -v
+bind v split-window -h
 
 # smart pane switching with awareness of vim splits
 bind -n C-h if-shell "$(tmux display-message -p '#{pane_current_command}' | grep -iq vim)" "send-keys C-h" "select-pane -L"

@@ -1,0 +1,198 @@
+#!/bin/bash
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
+export PATH=$PATH:~/.local/bin
+export PATH=$PATH:~/.arshan/bin
+
+function gitritual() {
+  cp ~/.ssh/config.ritual ~/.ssh/config;
+  ssh-add -D;
+  email="arshan@ritual.net"
+  git config --global user.name 'arshan-ritual';
+  git config --global user.email $email;
+  signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
+  git config --global --replace-all user.signingkey $signing_key;
+}
+
+function gitorigin() {
+  cp ~/.ssh/config.origin ~/.ssh/config;
+  ssh-add -D;
+  email="arshan+origin@ritual.net"
+  git config --global user.name 'arshan-origin';
+  git config --global user.email $email;
+  signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
+  git config --global --replace-all user.signingkey $signing_key;
+}
+
+function gitpersonal() {
+  cp ~/.ssh/config.personal ~/.ssh/config;
+  ssh-add -D;
+  email="arshankhanifar@gmail.com"
+  git config --global user.name 'arshankhanifar';
+  git config --global user.email $email;
+  signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
+  git config --global --replace-all user.signingkey $signing_key;
+}
+
+# suv = start uv
+alias suv="conda deactivate && source .venv/bin/activate"
+
+# snuv = "start new uv"
+alias snuv="uv venv -p 3.11 && conda deactivate && source .venv/bin/activate"
+
+# upip = "uv pip"
+alias upip="uv pip"
+
+alias make="gmake"
+
+# emulate linux
+function emlinux() {
+  docker run -it --rm -v $(pwd):/home/. --name  arshan arshankhanifar/python311:latest /bin/zsh
+}
+
+source "$HOME/.rye/env"
+
+alias sed="gsed"
+
+# for some stupid fuckin reason nillion puts their shit in ~/.zshenv
+source ~/.zshenv
+
+alias docrm='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
+
+# qcom: "this is a quick commit"
+function qcom() {
+  git commit -am $1
+}
+
+# qcomp: "this is a quick commit & push"
+function qcomp() {
+  git commit -am $1 && git push
+}
+
+MACHINE_FILEPATH=`echo ~/remote-machines.txt`
+
+function watchoor() {
+  src_path=$1
+  src_path=`pwd`/$src_path
+  src_path=`realpath $src_path`
+  dirname=`basename $src_path`
+  dst_path="~/synced/"
+
+  echo "src_path: $src_path"
+  if ! machine=`select_machine`; then return; fi
+  keypath=`echo $machine | cut -d ' ' -f1`
+  hostname=`echo $machine | cut -d ' ' -f2`
+
+  ssh -i $keypath $hostname "mkdir -p $dst_path"
+
+  # doing one sync when the watcher is set up
+  rsync -avz -e "ssh -i $keypath" "$src_path" --exclude "$EXCLUDE_PATHS" \
+    "$hostname:$dst_path"
+
+  function _sync() {
+    fswatch -0 "$src_path" | xargs -0 -n 1 -I {} bash -c '
+      function sync_event {
+        local src_path=$1
+        local keypath=$2
+        local hostname=$3
+        local dst_path=$4
+        echo "Detected change in $src_path"
+        rsync -avz -e "ssh -i $keypath" "$src_path" --exclude "$EXCLUDE_DIR" \
+          "$hostname:$dst_path"
+        echo "Done syncing to $hostname"
+      }
+      sync_event "$1" "$2" "$3" "$4"
+    ' _ "$src_path" "$keypath" "$hostname" "$dst_path"
+  }
+
+  _sync > /dev/null 2>&1 & sync_pid=`expr $! + 2`
+
+  echo "$sync_pid $keypath $hostname $src_path $dst_path " >> ~/watchoors
+}
+
+function get_watchoors() {
+  cat ~/watchoors
+}
+
+function kill_watchoor() {
+  watchoor_pid=`get_watchoors | fzf | awk '{print $1}'`
+  kill $watchoor_pid
+  sed -i "\|^$watchoor_pid|d" ~/watchoors
+}
+
+function select_machine() {
+  machine=`cat $MACHINE_FILEPATH | fzf`
+  if [ -z "$machine" ]; then return 1; fi;
+  keyfile=`echo $machine | awk '{print $2}'`
+  hostname=`echo $machine | awk '{print $3}'`
+  keypath=`realpath ~/.ssh/$keyfile`
+  echo "$keypath $hostname"
+}
+
+function sshh() {
+  if ! machine=`select_machine`; then echo "command was not successful"; return; fi
+  keypath=`echo $machine | cut -d ' ' -f1`
+  hostname=`echo $machine | cut -d ' ' -f2`
+  ssh -i $keypath $hostname
+}
+
+function scpull() {
+  if ! machine=`select_machine`; then echo "command was not successful"; return; fi
+  keypath=`echo $machine | cut -d ' ' -f1`
+  hostname=`echo $machine | cut -d ' ' -f2`
+  scp -i $keypath $hostname:$1 $2
+}
+
+function scpush() {
+  if ! machine=`select_machine`; then echo "command was not successful"; return; fi
+  keypath=`echo $machine | cut -d ' ' -f1`
+  hostname=`echo $machine | cut -d ' ' -f2`
+  scp -i $keypath $1 $hostname:$2
+}
+
+function describe_pod() {
+  line=`kubectl get pods --all-namespaces -o wide | fzf`
+  pod=`echo $line | awk '{print $2}'`
+  namespace=`echo $line | awk '{print $1}'`
+  kubectl describe pod $pod --namespace=$namespace
+}
+
+function delete_pod() {
+  line=`kubectl get pods --all-namespaces -o wide | fzf`
+  pod=`echo $line | awk '{print $2}'`
+  namespace=`echo $line | awk '{print $1}'`
+  kubectl delete pod $pod --namespace=$namespace --force
+}
+
+function delete_node() {
+  node=`kubectl get nodes -o wide | fzf |awk '{print $1}'`
+  kubectl delete node $node
+}
+
+function pod_logs() {
+  line=`kubectl get pods --all-namespaces -o wide | fzf`
+  pod=`echo $line | awk '{print $2}'`
+  namespace=`echo $line | awk '{print $1}'`
+  kubectl logs $pod -n $namespace $3
+}
+
+function create_vm() {
+  if [ -z "$1" ]; then
+    echo "Please provide a machine type"
+    return
+  fi
+	zone_line=`gcloud compute zones list | fzf `;
+	zone=`echo $zone_line | awk '{print $1}'`;
+	region=`echo $zone_line | awk '{print $2}'`;
+	echo "Creating instance in zone: $zone & region: $region";
+	instance_name=$(prefix)-$zone;
+	output=`gcloud compute instances create $instance_name \
+	  --zone=$zone \
+	  --machine-type=$1 \
+	  --image-family=debian-10 \
+	  --image-project=debian-cloud \
+	  --tags=http-server`;
+	ip=`echo $output | grep RUNNING | awk '{print $5}'`;
+	echo "$instance_name gcp-ritual $ip" >> $MACHINE_FILEPATH;
+}
+
