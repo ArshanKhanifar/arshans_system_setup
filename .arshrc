@@ -1,4 +1,5 @@
 #!/bin/bash
+echo $SHELL
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH=$PATH:~/.local/bin
@@ -125,7 +126,7 @@ function select_machine() {
   if [ -z "$machine" ]; then return 1; fi;
   keyfile=`echo $machine | awk '{print $2}'`
   hostname=`echo $machine | awk '{print $3}'`
-  keypath=`realpath ~/.ssh/$keyfile`
+  keypath="$keyfile"
   echo "$keypath $hostname"
 }
 
@@ -133,7 +134,7 @@ function sshh() {
   if ! machine=`select_machine`; then echo "command was not successful"; return; fi
   keypath=`echo $machine | cut -d ' ' -f1`
   hostname=`echo $machine | cut -d ' ' -f2`
-  ssh -i $keypath $hostname
+  ssh -o StrictHostKeyChecking=no -i $keypath $hostname
 }
 
 function scpull() {
@@ -161,7 +162,7 @@ function delete_pod() {
   line=`kubectl get pods --all-namespaces -o wide | fzf`
   pod=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $1}'`
-  kubectl delete pod $pod --namespace=$namespace --force
+  kubectl delete pod $pod --namespace=$namespace
 }
 
 function delete_node() {
@@ -194,5 +195,43 @@ function create_vm() {
 	  --tags=http-server`;
 	ip=`echo $output | grep RUNNING | awk '{print $5}'`;
 	echo "$instance_name gcp-ritual $ip" >> $MACHINE_FILEPATH;
+}
+
+function add_to_machine_file() {
+  filename=$1
+  # note: for looping over space-separated values don't work the same way in zsh,
+  # this should work both in bash and zsh
+  ip_addresses=(`cat $filename | awk '{print $4}' | tr '\n' ' '`);
+  for ip in "${ip_addresses[@]}"; do
+    name=`cat $filename | grep $ip | awk '{print $1}'`
+    ssh_user=`cat $filename | grep $ip | awk '{print $2}'`
+    ssh_key=`cat $filename | grep $ip | awk '{print $3}'`
+    sed -i "\|$ip|d" $MACHINE_FILEPATH
+    echo "$name $ssh_key $ssh_user@$ip" >> $MACHINE_FILEPATH
+  done
+}
+
+function add_gcp_vms_to_machine_file() {
+  gcloud compute instances list > /tmp/machines
+  ip_addresses=`cat /tmp/machines | awk '{print $5}'`
+  for ip in $ip_addresses; do
+		ssh-keygen -R $ip && ssh-keyscan -H $ip >> ~/.ssh/known_hosts 2>&1 > /dev/null
+    sed -i "\|$ip|d" $MACHINE_FILEPATH
+  done
+  cat /tmp/machines | awk '{print $1 " ~/.ssh/gcp-ritual ritual@" $5}' >> $MACHINE_FILEPATH
+  rm /tmp/machines
+}
+
+function delete_vm() {
+  line=`gcloud compute instances list | fzf`
+  instance_name=`echo $line | awk '{print $1}'`
+  instance_zone=`echo $line | awk '{print $2}'`
+  echo "Deleting instance $instance_name in zone $instance_zone"
+  if [ "$1" = "-q" ]; then
+    gcloud compute instances delete $instance_name -q --zone=$instance_zone 2>&1 > /dev/null &
+  else
+    gcloud compute instances delete $instance_name --zone=$instance_zone
+  fi
+  sed -i "\|$instance_name|d" $MACHINE_FILEPATH
 }
 

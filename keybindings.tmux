@@ -1,11 +1,11 @@
 # This file is now used in byobu, previously it was my .tmux.conf, but now it's under byobu's
 # keybindings.tmux file.
-unbind-key -n C-a
+unbind-key -n C-b
 
 # for all commands ctrl a is the prefix
-set -g prefix ^A
+set -g prefix C-Space
 set -g prefix2 F12
-bind a send-prefix
+bind C-Space send-prefix
 
 # tmux panes 
 # note: definition of "vertical" in tmux is the opposite of vim's
