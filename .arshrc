@@ -4,6 +4,7 @@ echo $SHELL
 eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH=$PATH:~/.local/bin
 export PATH=$PATH:~/.arshan/bin
+export PATH=$PATH:/usr/bin
 
 function gitritual() {
   cp ~/.ssh/config.ritual ~/.ssh/config;
@@ -36,10 +37,10 @@ function gitpersonal() {
 }
 
 # suv = start uv
-alias suv="conda deactivate && source .venv/bin/activate"
+alias suv="command -v conda && conda deactivate; source .venv/bin/activate"
 
 # snuv = "start new uv"
-alias snuv="uv venv -p 3.11 && conda deactivate && source .venv/bin/activate"
+alias snuv="uv venv -p 3.11; command -v conda && conda deactivate; source .venv/bin/activate"
 
 # upip = "uv pip"
 alias upip="uv pip"
