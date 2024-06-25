@@ -43,12 +43,23 @@ function install() {
   setStageCompleted "install"
 }
 
+function configure() {
+  if checkStageCompleted "configure"; then
+    return 0;
+  fi;
+  set -e
+  sudo nvidia-ctk runtime configure --runtime=docker
+  sudo systemctl restart docker
+  setStageCompleted "configure"
+}
+
 function verify() {
   if checkStageCompleted "verify"; then
     return 0;
   fi;
   set -e
-
+  # verify docker has GPU access
+  sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
   setStageCompleted "verify"
 }
 
@@ -56,6 +67,7 @@ function main() {
   set -e
   setUp
   install
+  configure
   verify
 }
 
