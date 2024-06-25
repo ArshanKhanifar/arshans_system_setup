@@ -9,7 +9,15 @@ function installDrivers() {
   set -e
   if ! nvidia-smi; then
     echo "nvidia-smi did not succeed, installing NVIDIA drivers..."
-    sudo apt-get -y install nvidia-driver-470
+    # from the commandline itself
+    sudo apt install -y nvidia-utils-535
+  fi
+  # verify drivers are installed
+  if nvidia-smi; then
+    echo "🎉 NVIDIA drivers installed successfully"
+  else
+    echo "❌ NVIDIA drivers not installed successfully"
+    exit 1
   fi
   setStageCompleted "installDrivers"
 }
@@ -37,7 +45,7 @@ function install() {
     return 0;
   fi;
   set -e
-  sudo apt-get update
+
   sudo apt-get install -y nvidia-container-toolkit
   sudo systemctl restart docker
   setStageCompleted "install"
@@ -58,6 +66,7 @@ function verify() {
     return 0;
   fi;
   set -e
+  # from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/sample-workload.html
   # verify docker has GPU access
   sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
   setStageCompleted "verify"
