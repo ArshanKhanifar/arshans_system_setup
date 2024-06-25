@@ -37,6 +37,9 @@ function installDrivers() {
     sudo apt-get update
     sudo apt install -y nvidia-driver-535
     sudo apt install -y nvidia-utils-535
+
+    # reload modules
+    sudo modprobe -rf nvidia_uvm nvidia_drm nvidia_modeset nvidia
   fi
   # verify drivers are installed
   if nvidia-smi; then
