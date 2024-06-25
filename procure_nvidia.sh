@@ -9,7 +9,11 @@ function installDrivers() {
   set -e
   if ! nvidia-smi; then
     echo "nvidia-smi did not succeed, installing NVIDIA drivers..."
-    # from the commandline itself
+    sudo apt-get -y install nvidia-driver-470
+
+    # from here: https://ubuntu.com/server/docs/nvidia-drivers-installation
+    sudo ubuntu-drivers install --gpgpu
+
     sudo apt install -y nvidia-utils-535
   fi
   # verify drivers are installed
