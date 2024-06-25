@@ -34,6 +34,7 @@ function installDrivers() {
 #    sudo ubuntu-drivers install --gpgpu
 
     # this requires a reboot I think
+    sudo apt-get update
     sudo apt install -y nvidia-driver-535
     sudo apt install -y nvidia-utils-535
   fi
