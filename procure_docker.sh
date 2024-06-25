@@ -9,7 +9,7 @@ function uninstall() {
     return 0;
   fi;
   for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
-    sudo apt-get remove $pkg;
+    sudo apt-get remove $pkg || true;
   done
   setStageCompleted "uninstall"
 }
