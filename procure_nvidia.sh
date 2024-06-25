@@ -54,7 +54,6 @@ function verify() {
 
 function main() {
   set -e
-  uninstall
   setUp
   install
   verify

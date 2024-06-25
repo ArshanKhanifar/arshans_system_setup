@@ -52,6 +52,7 @@ function verify() {
 }
 
 function main() {
+  uninstall
   setUp
   install
   verify
