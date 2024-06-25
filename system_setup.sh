@@ -36,10 +36,10 @@ if [ -z "$(which zsh)" ]; then
         source /etc/os-release
         if [ "${ID}" = "alpine" ]; then
           apk update
-          apk add --no-cache git zsh vim byobu
+          apk add --no-cache git zsh vim byobu make
         else
           apt-get update
-          apt-get install -y git-core zsh vim byobu
+          apt-get install -y git-core zsh vim byobu make
         fi
       else
         echo "Unable to determine the Linux distribution. Zsh not installed."
@@ -48,7 +48,7 @@ if [ -z "$(which zsh)" ]; then
     else
       # non-docker linux environment (right now I only support debian)
       sudo apt update
-      sudo apt install -y git zsh vim byobu
+      sudo apt install -y git zsh vim byobu make
     fi
   else
     echo "Zsh not installed, please install it before running this script."

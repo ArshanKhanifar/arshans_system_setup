@@ -235,3 +235,6 @@ function delete_vm() {
   sed -i "\|$instance_name|d" $MACHINE_FILEPATH
 }
 
+alias bazel710=/opt/homebrew/Cellar/bazel/7.1.2/libexec/bin/bazel-7.1.0-darwin-arm64
+
+
