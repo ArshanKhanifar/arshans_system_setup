@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # fail early
 set -eax
 
@@ -36,10 +38,11 @@ if [ -z "$(which zsh)" ]; then
         source /etc/os-release
         if [ "${ID}" = "alpine" ]; then
           apk update
-          apk add --no-cache git zsh vim byobu make
+          apk add --no-cache git zsh vim byobu make jq
         else
+          # non-alpine, so debian-based
           apt-get update
-          apt-get install -y git-core zsh vim byobu make
+          apt-get install -y git-core zsh vim byobu make jq
         fi
       else
         echo "Unable to determine the Linux distribution. Zsh not installed."
@@ -48,7 +51,7 @@ if [ -z "$(which zsh)" ]; then
     else
       # non-docker linux environment (right now I only support debian)
       sudo apt update
-      sudo apt install -y git zsh vim byobu make
+      sudo apt install -y git zsh vim byobu make jq
     fi
   else
     echo "Zsh not installed, please install it before running this script."
