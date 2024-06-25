@@ -1,4 +1,4 @@
-gen-docker-script:
+gen-setup-scripts:
 	cat procure_utils.sh procure_docker.sh > dist/docker_setup.sh
 	chmod +x dist/docker_setup.sh
 	# remove the "source ./procure_utils.sh" line from docker_desktop.sh
