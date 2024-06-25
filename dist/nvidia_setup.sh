@@ -21,8 +21,6 @@ function setStageCompleted() {
 }
 #!/bin/bash
 
-source ./procure_utils.sh
-
 
 function installDrivers() {
   if checkStageCompleted "installDrivers"; then

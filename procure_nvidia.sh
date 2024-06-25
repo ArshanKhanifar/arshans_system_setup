@@ -2,7 +2,6 @@
 
 source ./procure_utils.sh
 
-
 function installDrivers() {
   if checkStageCompleted "installDrivers"; then
     return 0;

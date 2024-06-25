@@ -21,7 +21,6 @@ function setStageCompleted() {
 }
 #!/bin/bash
 
-source ./procure_utils.sh
 
 set -ea
 
