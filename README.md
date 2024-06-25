@@ -1,6 +1,13 @@
 # Arshan's System Setup
 This repo contains the rc files that I use with my machines. Contains Vim shortcuts, tmux shortcuts, etc.
 
+## One-liners
+
+**Docker:**
+```
+bash -c "`curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/docker_setup.sh`"
+```
+
 ## Ubuntu Pre-requisites
 I forgot vanilla Ubuntu misses `git` and `curl`!
 ```
