@@ -39,6 +39,8 @@ function setUp() {
     return 0;
   fi;
   set -ea
+  grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
+
   sudo apt-get update || true;
   sudo apt-get install ca-certificates curl
   sudo install -m 0755 -d /etc/apt/keyrings
