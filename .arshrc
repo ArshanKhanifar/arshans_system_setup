@@ -79,6 +79,7 @@ MACHINE_FILEPATH=`echo ~/remote-machines.txt`
 
 function watchoor() {
   src_path=$1
+  ignore_path=$2
   src_path=`pwd`/$src_path
   src_path=`realpath $src_path`
   dirname=`basename $src_path`
@@ -91,9 +92,23 @@ function watchoor() {
 
   ssh -i $keypath $hostname "mkdir -p $dst_path"
 
-  # doing one sync when the watcher is set up
-  rsync -avz -e "ssh -i $keypath" "$src_path" --exclude "$EXCLUDE_PATH" \
-    "$hostname:$dst_path"
+  paths="$ignore_path $EXCLUDE_PATH"
+
+  if [ -f $src_path/.gitignore ]; then
+    paths+="`cat $src_path/.gitignore | tr '\n' ' '`";
+  fi;
+
+  excludes=`bash -c '
+    excludes=""
+    for item in $1; do
+      excludes+="--exclude $item "
+    done
+    echo $excludes
+  ' _ "$paths"`
+
+  sync_command="rsync -avz -e \"ssh -i $keypath\" \"$src_path\" $excludes \"$hostname:$dst_path\""
+
+  eval $sync_command
 
   function _sync() {
     fswatch -0 "$src_path" | xargs -0 -n 1 -I {} bash -c '
@@ -102,13 +117,18 @@ function watchoor() {
         local keypath=$2
         local hostname=$3
         local dst_path=$4
+        local excludes=$5
+
         echo "Detected change in $src_path"
-        rsync -avz -e "ssh -i $keypath" "$src_path" --exclude "$EXCLUDE_PATH" \
-          "$hostname:$dst_path"
+
+        sync_command="rsync -avz -e \"ssh -i $keypath\" \"$src_path\" $excludes \"$hostname:$dst_path\""
+
+        eval $sync_command
+
         echo "Done syncing to $hostname"
       }
-      sync_event "$1" "$2" "$3" "$4"
-    ' _ "$src_path" "$keypath" "$hostname" "$dst_path"
+      sync_event "$1" "$2" "$3" "$4" "$5"
+    ' _ "$src_path" "$keypath" "$hostname" "$dst_path" "$excludes"
   }
 
   _sync > /dev/null 2>&1 & sync_pid=`expr $! + 2`
