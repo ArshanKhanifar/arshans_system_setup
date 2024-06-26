@@ -77,7 +77,7 @@ function install() {
   fi;
   set -e
 
-  sudo apt-get install -y nvidia-container-toolkit
+  sudo apt-get install -y nvidia-container-toolkit git-lfs
   sudo systemctl restart docker
   setStageCompleted "install"
 }
