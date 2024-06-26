@@ -9,3 +9,4 @@ gen-script:
 gen-setup-scripts:
 	@make gen-script script=docker
 	@make gen-script script=nvidia
+	@make gen-script script=python
