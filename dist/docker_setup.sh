@@ -1,6 +1,6 @@
 #!/bin/bash
 
-progress_file="progress.json"
+progress_file="progress_docker.json"
 
 function checkStageCompleted() {
   stage=$1
