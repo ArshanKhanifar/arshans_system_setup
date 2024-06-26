@@ -8,6 +8,9 @@ export PATH=$PATH:~/.local/bin
 export PATH=$PATH:~/.arshan/bin
 export PATH=$PATH:/usr/bin
 
+# for all rust programs
+source $HOME/.cargo/env
+
 function gitritual() {
   cp ~/.ssh/config.ritual ~/.ssh/config;
   ssh-add -D;
