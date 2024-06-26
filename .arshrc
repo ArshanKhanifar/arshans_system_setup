@@ -170,6 +170,13 @@ function delete_pod() {
   kubectl delete pod $pod --namespace=$namespace
 }
 
+function delete_service() {
+  line=`kubectl get services --all-namespaces -o wide | fzf`
+  service=`echo $line | awk '{print $2}'`
+  namespace=`echo $line | awk '{print $1}'`
+  kubectl delete service $service --namespace=$namespace
+}
+
 function delete_node() {
   node=`kubectl get nodes -o wide | fzf |awk '{print $1}'`
   kubectl delete node $node
