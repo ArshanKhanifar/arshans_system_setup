@@ -110,6 +110,12 @@ echo "source-file ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.t
 echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.zshrc
 echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.bashrc
 
+# For unix-like systems, change the shell to zsh
+if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+  sudo chsh -s /bin/zsh `whoami`
+  echo 'ZSH_THEME=zhann' >> ~/${REPO_NAME}/${RCFILE}
+fi
+
 ##### password-requiring commands
 # check if INTERACTIVE is set
 if [ -z "${INTERACTIVE}" ]; then
