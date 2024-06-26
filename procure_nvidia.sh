@@ -27,7 +27,7 @@ function installDrivers() {
   if nvidia-smi; then
     echo "🎉 NVIDIA drivers installed successfully"
   else
-    echo "❌ NVIDIA drivers not installed successfully"
+    echo "❌ NVIDIA drivers not installed successfully: `uname -a`"
     exit 1
   fi
   setStageCompleted "installDrivers"
