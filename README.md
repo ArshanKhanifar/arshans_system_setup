@@ -18,6 +18,11 @@ bash -c "`curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_sy
 bash -c "`curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/python_setup.sh`"
 ```
 
+**System Setup:**
+```
+bash -c "`curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/system_setup.sh`" 
+```
+
 ## Ubuntu Pre-requisites
 I forgot vanilla Ubuntu misses `git` and `curl`!
 ```
