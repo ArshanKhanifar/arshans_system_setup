@@ -7,7 +7,7 @@ function install() {
     return 0;
   fi;
   set -e
-  sudo add-apt-repository ppa:deadsnakes/ppa
+  sudo add-apt-repository -y ppa:deadsnakes/ppa
   sudo apt-get update
   sudo apt install -y python3.11
   setStageCompleted "install"
