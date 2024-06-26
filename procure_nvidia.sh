@@ -12,7 +12,9 @@ function installDrivers() {
 
 #    # from here: https://ubuntu.com/server/docs/nvidia-drivers-installation
 #    sudo ubuntu-drivers install --gpgpu
+#    sudo apt-get update
 
+    grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
     # this requires a reboot I think
     sudo apt-get update
     sudo apt install -y nvidia-driver-535
