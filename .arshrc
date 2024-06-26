@@ -92,7 +92,7 @@ function watchoor() {
   ssh -i $keypath $hostname "mkdir -p $dst_path"
 
   # doing one sync when the watcher is set up
-  rsync -avz -e "ssh -i $keypath" "$src_path" --exclude "$EXCLUDE_PATHS" \
+  rsync -avz -e "ssh -i $keypath" "$src_path" --exclude "$EXCLUDE_PATH" \
     "$hostname:$dst_path"
 
   function _sync() {
@@ -103,7 +103,7 @@ function watchoor() {
         local hostname=$3
         local dst_path=$4
         echo "Detected change in $src_path"
-        rsync -avz -e "ssh -i $keypath" "$src_path" --exclude "$EXCLUDE_DIR" \
+        rsync -avz -e "ssh -i $keypath" "$src_path" --exclude "$EXCLUDE_PATH" \
           "$hostname:$dst_path"
         echo "Done syncing to $hostname"
       }
