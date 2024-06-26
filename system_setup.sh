@@ -107,8 +107,8 @@ byobu-ctrl-a screen
 echo "source-file ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.tmux
 
 # general.arshrc commands
-echo "source-file ~/${REPO_NAME}/${RCFILE}" >> ~/.zshrc
-echo "source-file ~/${REPO_NAME}/${RCFILE}" >> ~/.bashrc
+echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.zshrc
+echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.bashrc
 
 ##### password-requiring commands
 # check if INTERACTIVE is set
