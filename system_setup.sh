@@ -29,34 +29,32 @@ case "${unameOut}" in
     *)          machine="UNKNOWN:${unameOut}"
 esac
 
-# install zsh
-if [ -z "$(which zsh)" ]; then
-  if [ "${machine}" = "${MACHINE_LINUX}" ]; then
-    if [ "${ENVIRONMENT}" = "docker" ]; then
-      if [ -f "/etc/os-release" ]; then
-        # Detect the Linux distribution
-        source /etc/os-release
-        if [ "${ID}" = "alpine" ]; then
-          apk update
-          apk add --no-cache git zsh vim byobu make jq
-        else
-          # non-alpine, so debian-based
-          apt-get update
-          apt-get install -y git-core zsh vim byobu make jq
-        fi
+# install packages
+if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+  if [ "${ENVIRONMENT}" = "docker" ]; then
+    if [ -f "/etc/os-release" ]; then
+      # Detect the Linux distribution
+      source /etc/os-release
+      if [ "${ID}" = "alpine" ]; then
+        apk update
+        apk add --no-cache git zsh vim byobu make jq
       else
-        echo "Unable to determine the Linux distribution. Zsh not installed."
-        exit 1
+        # non-alpine, so debian-based
+        apt-get update
+        apt-get install -y git-core zsh vim byobu make jq
       fi
     else
-      # non-docker linux environment (right now I only support debian)
-      sudo apt update
-      sudo apt install -y git zsh vim byobu make jq
+      echo "Unable to determine the Linux distribution. Zsh not installed."
+      exit 1
     fi
   else
-    echo "Zsh not installed, please install it before running this script."
-    exit 1
+    # non-docker linux environment (right now I only support debian)
+    sudo apt update
+    sudo apt install -y git zsh vim byobu make jq
   fi
+else
+  echo "Zsh not installed, please install it before running this script."
+  exit 1
 fi
 
 # install uv
