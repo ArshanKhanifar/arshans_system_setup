@@ -92,10 +92,10 @@ function watchoor() {
 
   ssh -i $keypath $hostname "mkdir -p $dst_path"
 
-  paths="$ignore_path $EXCLUDE_PATH"
+  paths="$ignore_path $EXCLUDE_PATH .git .venv"
 
-  if [ -f $src_path/.gitignore ]; then
-    paths+="`cat $src_path/.gitignore | tr '\n' ' '`";
+  if [ -f $src_path/.gitignore ] && [ -n "$USE_GITIGNORE" ]; then
+    paths+="`cat $src_path/.gitignore | grep -vE '(#|\*|~$)' | tr '\n' ' '`";
   fi;
 
   excludes=`bash -c '
@@ -107,6 +107,9 @@ function watchoor() {
   ' _ "$paths"`
 
   sync_command="rsync -avz -e \"ssh -i $keypath\" \"$src_path\" $excludes \"$hostname:$dst_path\""
+
+  echo "sync command: 🐸"
+  echo $sync_command
 
   eval $sync_command
 
@@ -180,6 +183,7 @@ function describe_pod() {
   line=`kubectl get pods --all-namespaces -o wide | fzf`
   pod=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $1}'`
+  echo "kubectl describe pod $pod --namespace=$namespace"
   kubectl describe pod $pod --namespace=$namespace
 }
 
@@ -244,7 +248,12 @@ function add_to_machine_file() {
 }
 
 function add_gcp_vms_to_machine_file() {
-  gcloud compute instances list > /tmp/machines
+  gcloud compute instances list > /tmp/allmachines
+  if [ -z "$1" ] && [ "$1" = "auto" ]; then
+    cat /tmp/allmachines > /tmp/machines
+  else
+    cat /tmp/allmachines | fzf > /tmp/machines
+  fi;
   ip_addresses=`cat /tmp/machines | awk '{print $5}'`
   for ip in $ip_addresses; do
 		ssh-keygen -R $ip && ssh-keyscan -H $ip >> ~/.ssh/known_hosts 2>&1 > /dev/null
@@ -268,5 +277,4 @@ function delete_vm() {
 }
 
 alias bazel710=/opt/homebrew/Cellar/bazel/7.1.2/libexec/bin/bazel-7.1.0-darwin-arm64
-
 
