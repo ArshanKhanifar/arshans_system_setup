@@ -115,7 +115,7 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
   sudo chsh -s /bin/zsh `whoami`;
   sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="zhann"/' ~/.zshrc;
   echo 'export MACHINE_TITLE=pp1' >> ~/.zshrc;
-  echo 'PROMPT="%(?:%{$fg_bold[green]%}%1{🐸%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%}"' >> ~/.zshrc;
+  echo 'PROMPT="%(?:%{$fg_bold[green]%}%1{🐸%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} "' >> ~/.zshrc;
   echo 'alias docker="sudo docker"' >> ~/.zshrc
 fi
 
