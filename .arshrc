@@ -265,6 +265,12 @@ function add_gcp_vms_to_machine_file() {
   rm /tmp/machines
 }
 
+function docsh () {
+  container_info=`docker container ps | fzf`
+  container_id=`echo $container_info | awk '{print $1}'`
+  docker exec -it $container_id /bin/sh
+}
+
 function delete_vm() {
   line=`gcloud compute instances list | fzf`
   instance_name=`echo $line | awk '{print $1}'`
