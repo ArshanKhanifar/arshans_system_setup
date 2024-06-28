@@ -7,7 +7,8 @@ function installDrivers() {
     return 0;
   fi;
   set -e
-  if ! nvidia-smi; then
+  if [ -z "`command -v nvidia-smi`" ] || \
+    ! nvidia-smi --query-gpu=driver_version --format=csv,noheader | grep -q "555"; then
     echo "nvidia-smi did not succeed, installing NVIDIA drivers..."
 
     # install NVIDIA drivers (from here)
