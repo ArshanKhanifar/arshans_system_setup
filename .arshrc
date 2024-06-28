@@ -92,7 +92,9 @@ function watchoor() {
 
   ssh -i $keypath $hostname "mkdir -p $dst_path"
 
-  paths="$ignore_path $EXCLUDE_PATH .git .venv"
+  always_ignore=".git .venv .idea"
+
+  paths="$ignore_path $EXCLUDE_PATH $always_ignore"
 
   if [ -f $src_path/.gitignore ] && [ -n "$USE_GITIGNORE" ]; then
     paths+="`cat $src_path/.gitignore | grep -vE '(#|\*|~$)' | tr '\n' ' '`";

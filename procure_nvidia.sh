@@ -10,15 +10,24 @@ function installDrivers() {
   if ! nvidia-smi; then
     echo "nvidia-smi did not succeed, installing NVIDIA drivers..."
 
-#    # from here: https://ubuntu.com/server/docs/nvidia-drivers-installation
-#    sudo ubuntu-drivers install --gpgpu
-#    sudo apt-get update
+    # install NVIDIA drivers (from here)
+    # https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=22.04&target_type=deb_network
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+    sudo dpkg -i cuda-keyring_1.1-1_all.deb
+    sudo apt-get update
+    sudo apt-get -y install cuda-toolkit-12-5
+
+    cuda_path='export PATH=$PATH:/usr/local/cuda-12.5/bin/';
+    echo $cuda_path >> ~/.zshrc
+    echo $cuda_path >> ~/.bashrc
 
     grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
+
     # this requires a reboot I think
     sudo apt-get update
-    sudo apt install -y nvidia-driver-535
-    sudo apt install -y nvidia-utils-535
+    sudo apt-get install -y libnvidia-common-555
+    sudo apt-get install -y nvidia-driver-555-open
+    sudo apt-get install -y cuda-drivers-555
 
     # reload modules
     sudo modprobe -rf nvidia_uvm nvidia_drm nvidia_modeset nvidia
