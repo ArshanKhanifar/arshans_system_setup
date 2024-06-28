@@ -29,16 +29,16 @@ bash -c "`curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_sy
 bash -c "`curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/system_setup.sh`" 
 ```
 
-**Full Setup:**
-
-```
-bash -c "`curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/full_setup.sh`" 
-```
-
 **Note:** system script isn't really idempotent, if u wanna re-run it:
 
 ```
 rm -rf .vim .vimrc .oh-my-zsh .fzf arshans_system_setup
+```
+
+**Full Setup:**
+
+```
+bash -c "`curl -fsSL https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/full_setup.sh`" 
 ```
 
 ## Ubuntu Pre-requisites
