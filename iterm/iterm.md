@@ -20,3 +20,11 @@ Then make Arshan's profile the default.
 Then select `arshan_iterm_key_bindings.itermkeymap`.
 
 This'll enable tab swiching.
+
+## Disabling `option Right` & `option Left` 
+
+I use this whenever I'm using tmux to resize panes left & right.
+
+`Preferences` > `Profiles` > `Keys` > `Key Mappings` 
+
+<img width="1128" alt="image" src="https://github.com/ArshanKhanifar/arshans_system_setup/assets/10492324/5533fadf-4869-473d-92a6-7a55ba164491">
