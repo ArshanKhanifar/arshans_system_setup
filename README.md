@@ -9,21 +9,21 @@ shortcuts, etc.
 
 ```
 url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/docker_setup.sh"
-curl -fsSL $url | bash -s -- hello
+curl -fsSL $url | bash
 ```
 
 **Nvidia:**
 
 ```
 url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/nvidia_setup.sh"
-curl -fsSL $url | bash -s -- hello
+curl -fsSL $url | bash
 ```
 
 **Python:**
 
 ```
 url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/python_setup.sh"
-curl -fsSL $url | bash -s -- hello
+curl -fsSL $url | bash
 ```
 
 **System Setup:**
