@@ -15,7 +15,7 @@ sudo apt update && sudo apt install -y curl
 USER_NAME="arshankhanifar"
 REPO_NAME="arshans_system_setup"
 RCFILE=".arshrc"
-NOPLUGINS_VIMRC="no_plugins.vimrc"
+NOPLUGINS_VIMRC="no_plugins.vim"
 JETBRAINS_VIMRC="arshan_jetbrains.ideavimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
 CUSTOM_VIM="custom.vim"

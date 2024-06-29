@@ -258,7 +258,7 @@ function add_gcp_vms_to_machine_file() {
   if [ -z "$1" ] && [ "$1" = "auto" ]; then
     cat /tmp/allmachines > /tmp/machines
   else
-    cat /tmp/allmachines | fzf > /tmp/machines
+    cat /tmp/allmachines | fzf -m > /tmp/machines
   fi;
   ip_addresses=`cat /tmp/machines | awk '{print $5}'`
   for ip in $ip_addresses; do
