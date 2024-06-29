@@ -7,6 +7,7 @@ set -g prefix C-Space
 set -g prefix2 F12
 bind C-Space send-prefix
 
+
 # tmux panes 
 # note: definition of "vertical" in tmux is the opposite of vim's
 # and I'm using vim's.
@@ -21,4 +22,16 @@ bind -n C-j if-shell "$(tmux display-message -p '#{pane_current_command}' | grep
 bind -n C-k if-shell "$(tmux display-message -p '#{pane_current_command}' | grep -iq vim)" "send-keys C-k" "select-pane -U"
 bind -n C-l if-shell "$(tmux display-message -p '#{pane_current_command}' | grep -iq vim)" "send-keys C-l" "select-pane -R"
 bind -n C-\\ if-shell "$(tmux display-message -p '#{pane_current_command}' | grep -iq vim)" "send-keys C-\\" "select-pane -l"
+
+# Resize panes with prefix + option + jklh
+bind-key -r -T prefix       M-Up              resize-pane -U 2
+bind-key -r -T prefix       M-Down            resize-pane -D 2
+bind-key -r -T prefix       M-Left            resize-pane -L 5
+bind-key -r -T prefix       M-Right           resize-pane -R 5
+
+# Resize panes with prefix + option + jklh
+bind-key -r -T prefix       M-k               resize-pane -U 2
+bind-key -r -T prefix       M-j               resize-pane -D 2
+bind-key -r -T prefix       M-h               resize-pane -L 5
+bind-key -r -T prefix       M-l               resize-pane -R 5
 
