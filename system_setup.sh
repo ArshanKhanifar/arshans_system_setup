@@ -60,6 +60,8 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
       exit 1
     fi
   else
+    # skip restart prompt
+    grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
     # non-docker linux environment (right now I only support debian)
     sudo apt update
     sudo apt install -y git zsh vim byobu make jq silversearcher-ag
