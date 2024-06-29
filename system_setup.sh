@@ -9,7 +9,7 @@ if ! which sudo 2>&1 > /dev/null; then
 fi
 
 # when debugging this in docker ubuntu
-sudo apt update && sudo apt install -y curl git
+sudo apt update && sudo apt install -y curl
 
 # for some packages that require user input
 export DEBIAN_FRONTEND=noninteractive
