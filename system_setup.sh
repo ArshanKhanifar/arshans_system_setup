@@ -30,7 +30,7 @@ case "${unameOut}" in
 esac
 
 if ! sudo -h 2>&1 > /dev/null; then
-  alias sudo=':'
+  alias sudo=' '
 fi
 
 # install packages
