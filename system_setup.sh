@@ -49,8 +49,13 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
     fi
   else
     # non-docker linux environment (right now I only support debian)
-    sudo apt update
-    sudo apt install -y git zsh vim byobu make jq silversearcher-ag
+    if command -v sudo &> /dev/null; then
+      sudo apt update
+      sudo apt install -y git zsh vim byobu make jq silversearcher-ag
+    else
+      apt update
+      apt install -y git zsh vim byobu make jq silversearcher-ag
+    fi
   fi
 else
   echo "Zsh not installed, please install it before running this script."
