@@ -49,7 +49,7 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
     fi
   else
     # non-docker linux environment (right now I only support debian)
-    if command -v sudo &> /dev/null; then
+    if sudo -h 2>&1 > /dev/null; then
       sudo apt update
       sudo apt install -y git zsh vim byobu make jq silversearcher-ag
     else
