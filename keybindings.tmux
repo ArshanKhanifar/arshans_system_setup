@@ -24,10 +24,12 @@ bind -n C-l if-shell "$(tmux display-message -p '#{pane_current_command}' | grep
 bind -n C-\\ if-shell "$(tmux display-message -p '#{pane_current_command}' | grep -iq vim)" "send-keys C-\\" "select-pane -l"
 
 # Resize panes with prefix + option + jklh
+# Note: by default I've set Option + Left & Option + Right on iterm to send some other pattern.
+# That's because I like to hold option & jump between words. That's why resize-pane won't work.
 bind-key -r -T prefix       M-Up              resize-pane -U 2
 bind-key -r -T prefix       M-Down            resize-pane -D 2
-bind-key -r -T prefix       M-Left            resize-pane -L 5
-bind-key -r -T prefix       M-Right           resize-pane -R 5
+bind-key -r -T prefix       M-Left            resize-pane -L 5 # wont work in iterm
+bind-key -r -T prefix       M-Right           resize-pane -R 5 # wont work in iterm
 
 # Resize panes with prefix + option + jklh
 bind-key -r -T prefix       M-k               resize-pane -U 2
