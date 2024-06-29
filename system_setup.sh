@@ -11,8 +11,6 @@ fi
 # when debugging this in docker ubuntu
 sudo apt update && sudo apt install -y curl
 
-# for some packages that require user input
-export DEBIAN_FRONTEND=noninteractive
 
 USER_NAME="arshankhanifar"
 REPO_NAME="arshans_system_setup"
@@ -39,6 +37,9 @@ case "${unameOut}" in
     MINGW*)     machine=MinGw;;
     *)          machine="UNKNOWN:${unameOut}"
 esac
+
+# for some packages that require user input
+DEBIAN_FRONTEND=noninteractive
 
 # install packages
 if [ "${machine}" = "${MACHINE_LINUX}" ]; then
@@ -67,6 +68,8 @@ else
   echo "Zsh not installed, please install it before running this script."
   exit 1
 fi
+
+unset DEBIAN_FRONTEND
 
 # install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
