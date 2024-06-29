@@ -88,9 +88,6 @@ git clone https://github.com/$USER_NAME/$REPO_NAME
 echo "source ~/${REPO_NAME}/${NOPLUGINS_VIMRC}" >> ~/.vimrc
 echo "source ~/${REPO_NAME}/${JETBRAINS_VIMRC}" >> ~/.ideavimrc
 
-# install custom scripts
-echo "source ~/${REPO_NAME}/${CUSTOM_VIM}" >> ~/.vimrc
-
 # install vundle:
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
@@ -109,6 +106,9 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 echo "source ~/${REPO_NAME}/${PLUG_PLUGINS}" >> ~/.vimrc
 #vim +'PlugInstall --sync' +qa
 echo | vim +'PlugInstall --sync' +qa
+
+# install custom scripts
+echo "source ~/${REPO_NAME}/${CUSTOM_VIM}" >> ~/.vimrc
 
 # set up byobu 
 export BYOBU_BACKEND=tmux
