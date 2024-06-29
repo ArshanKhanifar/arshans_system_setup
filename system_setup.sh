@@ -96,7 +96,7 @@ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
 # install vundle plugins:
 echo "source ~/${REPO_NAME}/${VUNDLE_PLUGINS}" >> ~/.vimrc
-vim +PluginInstall +qall
+vim +PluginInstall +qall < /dev/null
 
 # install plug
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
