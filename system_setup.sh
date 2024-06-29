@@ -3,8 +3,11 @@
 # fail early
 set -eax
 
-if ! sudo -h 2>&1 > /dev/null; then
+if ! which sudo 2>&1 > /dev/null; then
+  echo "sudo does not exist, setting alias to empty string."
   alias sudo=' '
+else
+  echo "sudo exists"
 fi
 
 # when debugging this in docker ubuntu
