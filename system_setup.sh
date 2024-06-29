@@ -74,6 +74,13 @@ unset DEBIAN_FRONTEND
 # install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
+# install zoxide
+curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
+echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.zshrc
+echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
+echo 'eval "$(zoxide init zsh)"' >> ~/.zshrc
+
 # install oh-my-zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
