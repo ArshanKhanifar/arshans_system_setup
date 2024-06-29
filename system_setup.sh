@@ -41,7 +41,7 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
       else
         # non-alpine, so debian-based
         apt-get update
-        apt-get install -y git-core zsh vim byobu make jq
+        apt-get install -y git-core zsh vim byobu make jq silversearcher-ag
       fi
     else
       echo "Unable to determine the Linux distribution. Zsh not installed."
@@ -50,7 +50,7 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
   else
     # non-docker linux environment (right now I only support debian)
     sudo apt update
-    sudo apt install -y git zsh vim byobu make jq
+    sudo apt install -y git zsh vim byobu make jq silversearcher-ag
   fi
 else
   echo "Zsh not installed, please install it before running this script."

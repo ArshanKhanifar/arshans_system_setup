@@ -11,5 +11,10 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'christoomey/vim-tmux-navigator'
+" from here: https://draculatheme.com/vim
+Plugin 'dracula/vim', { 'name': 'dracula' }
 call vundle#end()            " required
 filetype plugin indent on    " required
+
+" set the theme
+colorscheme dracula
