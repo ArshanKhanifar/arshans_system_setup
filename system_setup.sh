@@ -104,7 +104,7 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 
 # install plug plugins:
 echo "source ~/${REPO_NAME}/${PLUG_PLUGINS}" >> ~/.vimrc
-vim +'PlugInstall --sync' +qa
+vim +'PlugInstall --sync' +qa < /dev/null
 
 # set up byobu 
 export BYOBU_BACKEND=tmux
