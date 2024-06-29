@@ -96,7 +96,10 @@ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
 # install vundle plugins:
 echo "source ~/${REPO_NAME}/${VUNDLE_PLUGINS}" >> ~/.vimrc
-vim +PluginInstall +qall < /dev/null
+#vim +PluginInstall +qall < /dev/null || true
+# I had issues w this: https://github.com/VundleVim/Vundle.vim/issues/511
+echo | vim +PluginInstall +qall
+
 
 # install plug
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
@@ -104,7 +107,8 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 
 # install plug plugins:
 echo "source ~/${REPO_NAME}/${PLUG_PLUGINS}" >> ~/.vimrc
-vim +'PlugInstall --sync' +qa < /dev/null
+#vim +'PlugInstall --sync' +qa
+echo | vim +'PlugInstall --sync' +qa
 
 # set up byobu 
 export BYOBU_BACKEND=tmux
