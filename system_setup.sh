@@ -108,12 +108,19 @@ echo "source-file ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.t
 echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.zshrc
 echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.bashrc
 
+emojis=(🐳 🐸 🙈 🐶 🐥 🐝 🐞 🪲)
+emoji="${emojis[RANDOM % ${#emojis[@]}]}"
+machine_title="$emoji-$1"
+
 # For unix-like systems, change the shell to zsh
 if [ "${machine}" = "${MACHINE_LINUX}" ]; then
   sudo chsh -s /bin/zsh `whoami`;
   sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="zhann"/' ~/.zshrc;
   echo 'export MACHINE_TITLE=pp1' >> ~/.zshrc;
-  echo 'PROMPT="%(?:%{$fg_bold[green]%}%1{🐸%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} "' >> ~/.zshrc;
+  preprompt='PROMPT="%(?:%{$fg_bold[green]%}%1{'
+  postprompt='%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} "'
+  prompt="$preprompt$machine_title$postprompt"
+  echo $prompt >> ~/.zshrc;
   echo 'alias docker="sudo docker"' >> ~/.zshrc
 fi
 

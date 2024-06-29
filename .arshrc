@@ -54,7 +54,11 @@ alias make="gmake"
 
 # emulate linux
 function emlinux() {
-  docker run -it --rm -v $(pwd):/home/. --name  arshan arshankhanifar/python311:latest /bin/zsh
+  image="arshankhanifar/python311:latest"
+  if [ -n "$1" ]; then
+    image=$1
+  fi
+  docker run -it --rm -v $(pwd):/home/. --name arshan $image sh -c 'shell=`command -v zsh || command -v bash || command -v sh`; eval $shell'
 }
 
 alias sed="gsed"
