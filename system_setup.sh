@@ -4,8 +4,8 @@
 set -eax
 
 if ! which sudo 2>&1 > /dev/null; then
-  alias sudo=' '
-  echo "yo"
+  sudo() { "$@"; }
+  echo "sudo command not found, using direct execution."
 fi
 
 # when debugging this in docker ubuntu
