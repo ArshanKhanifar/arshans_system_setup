@@ -29,6 +29,10 @@ case "${unameOut}" in
     *)          machine="UNKNOWN:${unameOut}"
 esac
 
+if ! sudo -h 2>&1 > /dev/null; then
+  alias sudo=':'
+fi
+
 # install packages
 if [ "${machine}" = "${MACHINE_LINUX}" ]; then
   if [ "${ENVIRONMENT}" = "docker" ]; then
@@ -49,13 +53,8 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
     fi
   else
     # non-docker linux environment (right now I only support debian)
-    if sudo -h 2>&1 > /dev/null; then
-      sudo apt update
-      sudo apt install -y git zsh vim byobu make jq silversearcher-ag
-    else
-      apt update
-      apt install -y git zsh vim byobu make jq silversearcher-ag
-    fi
+    sudo apt update
+    sudo apt install -y git zsh vim byobu make jq silversearcher-ag
   fi
 else
   echo "Zsh not installed, please install it before running this script."
