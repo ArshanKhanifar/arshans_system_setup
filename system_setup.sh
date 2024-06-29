@@ -3,6 +3,16 @@
 # fail early
 set -eax
 
+if ! sudo -h 2>&1 > /dev/null; then
+  alias sudo=' '
+fi
+
+# when debugging this in docker ubuntu
+sudo apt update && sudo apt install -y curl git
+
+# for some packages that require user input
+export DEBIAN_FRONTEND=noninteractive
+
 USER_NAME="arshankhanifar"
 REPO_NAME="arshans_system_setup"
 RCFILE=".arshrc"
@@ -28,10 +38,6 @@ case "${unameOut}" in
     MINGW*)     machine=MinGw;;
     *)          machine="UNKNOWN:${unameOut}"
 esac
-
-if ! sudo -h 2>&1 > /dev/null; then
-  alias sudo=' '
-fi
 
 # install packages
 if [ "${machine}" = "${MACHINE_LINUX}" ]; then
@@ -98,15 +104,19 @@ vim +'PlugInstall --sync' +qa
 
 # set up byobu 
 export BYOBU_BACKEND=tmux
+
 # create & kill a session (to create the ~/.byobu directory)
 byobu new-session -d -s temp
 byobu kill-session -t temp
+# create it anyways (in case the above doesn't work - it does not in docker ubuntu)
+mkdir -p ~/.byobu
+
 # select the backend & switch to screen
 byobu-select-backend tmux
 byobu-ctrl-a screen
 
 # byobu keybinding config
-echo "source-file ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.tmux
+echo "source ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.tmux
 
 # general.arshrc commands
 echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.zshrc

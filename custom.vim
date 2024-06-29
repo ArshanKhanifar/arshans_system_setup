@@ -14,4 +14,3 @@ colorscheme dracula
 
 # starlark files (Kurtosis scripts)
 autocmd FileType *.star setlocal filetype=python
-
