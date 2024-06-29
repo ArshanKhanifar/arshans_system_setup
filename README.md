@@ -9,28 +9,28 @@ shortcuts, etc.
 
 ```
 url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/docker_setup.sh"
-curl -fsSL $url | sh -
+curl -fsSL $url | bash -s -- hello
 ```
 
 **Nvidia:**
 
 ```
 url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/nvidia_setup.sh"
-curl -fsSL $url | sh -
+curl -fsSL $url | bash -s -- hello
 ```
 
 **Python:**
 
 ```
 url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/python_setup.sh"
-curl -fsSL $url | sh -
+curl -fsSL $url | bash -s -- hello
 ```
 
 **System Setup:**
 
 ```
 url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/system_setup.sh"
-curl -fsSL $url | sh -
+curl -fsSL $url | bash -s -- hello
 ```
 
 **Note:** system script isn't really idempotent, if u wanna re-run it:
@@ -43,7 +43,7 @@ rm -rf .vim .vimrc .oh-my-zsh .fzf arshans_system_setup
 
 ```
 url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/full_setup.sh"
-curl -fsSL $url | sh -
+curl -fsSL $url | bash -s -- hello
 ```
 
 ## Ubuntu Pre-requisites

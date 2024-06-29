@@ -5,6 +5,7 @@ set -eax
 
 if ! which sudo 2>&1 > /dev/null; then
   alias sudo=' '
+  echo "yo"
 fi
 
 # when debugging this in docker ubuntu
