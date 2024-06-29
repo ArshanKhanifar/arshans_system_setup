@@ -9,3 +9,9 @@ augroup END
 # starlark files (Kurtosis scripts)
 autocmd FileType *.star setlocal filetype=python
 
+" set the theme
+colorscheme dracula
+
+# starlark files (Kurtosis scripts)
+autocmd FileType *.star setlocal filetype=python
+
