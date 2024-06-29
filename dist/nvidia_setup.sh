@@ -57,7 +57,11 @@ function installDrivers() {
   if nvidia-smi; then
     echo "🎉 NVIDIA drivers installed successfully"
   else
-    echo "❌ NVIDIA drivers not installed successfully: `uname -a`"
+    echo "❌ NVIDIA not-loaded: `uname -a`"
+    if [ "$1" == "reboot" ]; then
+      echo "Rebooting..."
+      sudo reboot
+    fi
     exit 1
   fi
   setStageCompleted "installDrivers"
@@ -69,7 +73,7 @@ function setUp() {
   fi;
   set -e
 
-  installDrivers;
+  installDrivers $1;
 
   # Install container toolkit
   curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
@@ -115,10 +119,10 @@ function verify() {
 
 function main() {
   set -e
-  setUp
+  setUp $1
   install
   configure
   verify
 }
 
-main
+main $1
