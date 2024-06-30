@@ -3,9 +3,6 @@
 source ./procure_utils.sh
 
 function installDrivers() {
-  if checkStageCompleted "installDrivers"; then
-    return 0;
-  fi;
   set -e
   if [ -z "`command -v nvidia-smi`" ] || \
     ! nvidia-smi --query-gpu=driver_version --format=csv,noheader | grep -q "555"; then
@@ -44,16 +41,11 @@ function installDrivers() {
     fi
     exit 1
   fi
-  setStageCompleted "installDrivers"
 }
 
 function setUp() {
-  if checkStageCompleted "setUp"; then
-    return 0;
-  fi;
   set -e
-
-  installDrivers $1;
+  xst installDrivers $1;
 
   # Install container toolkit
   curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
@@ -61,48 +53,33 @@ function setUp() {
       sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
       sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
   sudo apt-get update
-
-  setStageCompleted "setUp"
 }
 
 function install() {
-  if checkStageCompleted "install"; then
-    return 0;
-  fi;
   set -e
-
   sudo apt-get install -y nvidia-container-toolkit git-lfs
   sudo systemctl restart docker
-  setStageCompleted "install"
 }
 
 function configure() {
-  if checkStageCompleted "configure"; then
-    return 0;
-  fi;
   set -e
   sudo nvidia-ctk runtime configure --runtime=docker
   sudo systemctl restart docker
-  setStageCompleted "configure"
 }
 
 function verify() {
-  if checkStageCompleted "verify"; then
-    return 0;
-  fi;
   set -e
   # from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/sample-workload.html
   # verify docker has GPU access
   sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
-  setStageCompleted "verify"
 }
 
 function main() {
   set -e
-  setUp $1
-  install
-  configure
-  verify
+  xst setUp $1
+  xst install
+  xst configure
+  xst verify
 }
 
 main $1

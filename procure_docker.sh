@@ -5,20 +5,13 @@ source ./procure_utils.sh
 set -ea
 
 function uninstall() {
-  if checkStageCompleted "uninstall"; then
-    return 0;
-  fi;
   for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
     sudo apt-get remove $pkg || true;
   done
-  setStageCompleted "uninstall"
 }
 
 function setUp() {
-  if checkStageCompleted "setUp"; then
-    return 0;
-  fi;
-  set -ea
+  set -e
 
   grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
 
@@ -34,31 +27,23 @@ function setUp() {
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   sudo apt-get update || true;
-
-  setStageCompleted "setUp"
 }
 
 function install() {
-  if checkStageCompleted "install"; then
-    return 0;
-  fi;
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  setStageCompleted "install"
+  set -e;
+  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin;
 }
 
 function verify() {
-  if checkStageCompleted "verify"; then
-    return 0;
-  fi;
-   sudo docker run hello-world
-  setStageCompleted "verify"
+  set -e;
+  sudo docker run hello-world
 }
 
 function main() {
-  uninstall
-  setUp
-  install
-  verify
+  xst uninstall
+  xst setUp
+  xst install
+  xst verify
 }
 
 main
