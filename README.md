@@ -29,7 +29,7 @@ curl -fsSL $url | bash
 **Profile Setup:**
 
 ```
-url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/profile_setup.sh"
+url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/profile_setup.sh"
 curl -fsSL $url | bash -s -- hello
 ```
 
