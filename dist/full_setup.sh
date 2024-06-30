@@ -13,7 +13,7 @@ function checkStageCompleted() {
 
 function setStageCompleted() {
   stage=$1;
-  if [ ! -f $progress_file ]; then
+  if [ ! -f "$progress_file" ]; then
     echo "{}" > $progress_file;
   fi;
   jq ".$stage = true" $progress_file > "$progress_file.tmp";
@@ -21,7 +21,7 @@ function setStageCompleted() {
 };
 
 function xst() {
-  if [ -z $progress_file ]; then
+  if [ -z "$progress_file" ]; then
     echo "❌ progress_file not set";
     return 1;
   fi;

@@ -13,7 +13,7 @@ function checkStageCompleted() {
 
 function setStageCompleted() {
   stage=$1;
-  if [ ! -f $progress_file ]; then
+  if [ ! -f "$progress_file" ]; then
     echo "{}" > $progress_file;
   fi;
   jq ".$stage = true" $progress_file > "$progress_file.tmp";
@@ -21,7 +21,7 @@ function setStageCompleted() {
 };
 
 function xst() {
-  if [ -z $progress_file ]; then
+  if [ -z "$progress_file" ]; then
     echo "❌ progress_file not set";
     return 1;
   fi;
@@ -41,14 +41,14 @@ function xst() {
 #!/bin/bash
 
 
-if [ $runtime = "docker" ]; then
+if [ "$runtime" = "docker" ]; then
   sudo() { "$@"; }
   echo "sudo command not found, using direct execution."
 fi
 
 function install() {
   set -e
-  if ! [ $runtime = "docker" ]; then
+  if ! [ "$runtime" = "docker" ]; then
     grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf;
   fi
   sudo apt-get update && apt-get install -y software-properties-common
