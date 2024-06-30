@@ -41,9 +41,14 @@ function xst() {
 #!/bin/bash
 
 
+if [ $runtime = "docker" ]; then
+  sudo() { "$@"; }
+  echo "sudo command not found, using direct execution."
+fi
+
 function install() {
   set -e
-  if ! [ $env = "docker" ]; then
+  if ! [ $runtime = "docker" ]; then
     grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf;
   fi
   sudo add-apt-repository -y ppa:deadsnakes/ppa
