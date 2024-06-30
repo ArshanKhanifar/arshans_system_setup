@@ -3,7 +3,7 @@
 source ./procure_utils.sh
 
 # fail early
-set -eax
+set -e
 
 if ! which sudo 2>&1 > /dev/null; then
   sudo() { "$@"; }
