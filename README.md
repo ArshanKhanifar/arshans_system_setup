@@ -26,10 +26,10 @@ url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/maste
 curl -fsSL $url | bash
 ```
 
-**System Setup:**
+**Profile Setup:**
 
 ```
-url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/system_setup.sh"
+url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/profile_setup.sh"
 curl -fsSL $url | bash -s -- hello
 ```
 
