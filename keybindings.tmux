@@ -37,5 +37,6 @@ bind-key -r -T prefix       M-j               resize-pane -D 2
 bind-key -r -T prefix       M-h               resize-pane -L 5
 bind-key -r -T prefix       M-l               resize-pane -R 5
 
-set-option -g mouse on
+# mouse tracking (doesn't work nicely in iterm2)
+# set-option -g mouse on
 
