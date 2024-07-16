@@ -104,6 +104,7 @@ function verify() {
   # docker
   sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
   # containerd
+  sudo ctr image pull docker.io/library/ubuntu:latest
   sudo ctr run --rm --gpus 0 -t docker.io/library/ubuntu:latest wagwan nvidia-smi
 }
 
