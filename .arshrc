@@ -212,6 +212,11 @@ function poddescribe() {
   kubectl describe pod $pod --namespace=$namespace
 }
 
+function nodedescribe() {
+  node=`kubectl get nodes -o wide | fzf | awk '{print $1}'`
+  kubectl describe node $node
+}
+
 function poddelete() {
   line=`kubectl get pods --all-namespaces -o wide | fzf`
   pod=`echo $line | awk '{print $2}'`
