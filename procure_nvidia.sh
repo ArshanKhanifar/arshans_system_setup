@@ -9,19 +9,13 @@ function installHelm() {
 }
 
 function installNvidiaHelmRepo() {
-    sudo helm repo add nvidia https://helm.ngc.nvidia.com/nvidia && helm repo update
-    # install the operator
-    sudo helm install --wait nvidiagpu \
-     -n gpu-operator --create-namespace \
-    --set toolkit.env[0].name=CONTAINERD_CONFIG \
-    --set toolkit.env[0].value=/var/lib/rancher/k3s/agent/etc/containerd/config.toml \
-    --set toolkit.env[1].name=CONTAINERD_SOCKET \
-    --set toolkit.env[1].value=/run/k3s/containerd/containerd.sock \
-    --set toolkit.env[2].name=CONTAINERD_RUNTIME_CLASS \
-    --set toolkit.env[2].value=nvidia \
-    --set toolkit.env[3].name=CONTAINERD_SET_AS_DEFAULT \
-    --set-string toolkit.env[3].value=true \
-     nvidia/gpu-operator
+    if sudo helm repo list | grep -q nvidia; then
+      echo "nvidia repo already exists. skipping..."
+    else
+        sudo helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+    fi
+
+    sudo helm repo update
 }
 
 function installToolkit() {
@@ -65,7 +59,7 @@ function installDrivers() {
     sudo modprobe -rf nvidia_uvm nvidia_drm nvidia_modeset nvidia
   fi
   # verify drivers are installed
-  if nvidia-smi; then
+  if nvidia-smi --query-gpu=driver_version --format=csv,noheader | grep -q "555"; then
     echo "🎉 NVIDIA drivers installed successfully"
   else
     echo "❌ NVIDIA not-loaded: `uname -a`"
