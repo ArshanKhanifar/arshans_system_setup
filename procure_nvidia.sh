@@ -62,7 +62,7 @@ function installDrivers() {
   if nvidia-smi --query-gpu=driver_version --format=csv,noheader | grep -q "555"; then
     echo "🎉 NVIDIA drivers installed successfully"
   else
-    echo "❌ NVIDIA not-loaded: `uname -a`"
+    echo "❌ NVIDIA not loaded: `uname -a`"
     if [ "$1" == "reboot" ]; then
       echo "Rebooting..."
       sudo reboot
