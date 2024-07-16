@@ -9,6 +9,8 @@ export PATH=$PATH:~/.local/bin
 export PATH=$PATH:~/.arshan/bin
 export PATH=$PATH:/usr/bin
 
+source "$HOME/.rye/env"
+
 # for all rust programs
 source $HOME/.cargo/env
 
@@ -61,7 +63,7 @@ alias make="gmake"
 
 # emulate linux
 function emlinux() {
-  image="arshankhanifar/python311:latest"
+  image="arshankhanifar/profile:latest"
   if [ -n "$1" ]; then
     image=$1
   fi
@@ -75,6 +77,16 @@ alias sed="gsed"
 [ -f ~/.zshenv ] && source ~/.zshenv
 
 alias docrm='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
+
+function dockill() {
+  container_info=`docker container ps | fzf`;
+  if [ -z $container_info ]; then
+    echo "no container specified";
+    return 1;
+  fi;
+  container_id=`echo $container_info | awk '{print $1}'`;
+  docker kill $container_id;
+}
 
 # qcom: "this is a quick commit"
 function qcom() {
@@ -200,7 +212,7 @@ function poddescribe() {
   kubectl describe pod $pod --namespace=$namespace
 }
 
-function delete_pod() {
+function poddelete() {
   line=`kubectl get pods --all-namespaces -o wide | fzf`
   pod=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $1}'`
@@ -223,7 +235,7 @@ function podlogs() {
   line=`kubectl get pods --all-namespaces -o wide | fzf`
   pod=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $1}'`
-  kubectl logs $pod -n $namespace $3
+  kubectl logs $pod -n $namespace "$@";
 }
 
 function create_vm() {
@@ -280,6 +292,19 @@ function docsh() {
   container_info=`docker container ps | fzf`
   container_id=`echo $container_info | awk '{print $1}'`
   docker exec -it $container_id /bin/sh
+}
+
+function doclogs() {
+  container_info=`docker container ps | fzf`
+  container_id=`echo $container_info | awk '{print $1}'`
+  docker logs -f $container_id
+}
+
+function podsh() {
+  pod_info=`kubectl get pods --all-namespaces -o wide | fzf`
+  pod_name=`echo $pod_info | awk '{print $2}'`
+  namespace=`echo $pod_info | awk '{print $1}'`
+  kubectl exec -it $pod_name -n $namespace -- /bin/sh
 }
 
 function docinspect() {
