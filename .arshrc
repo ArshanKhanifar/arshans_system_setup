@@ -11,6 +11,11 @@ export PATH=$PATH:/usr/bin
 
 source "$HOME/.rye/env"
 
+if [ `uname -s` = "Darwin" ]; then
+  alias make="gmake"
+  alias sed="gsed"
+fi
+
 # for all rust programs
 source $HOME/.cargo/env
 
@@ -59,7 +64,6 @@ alias snuv="uv venv -p 3.11; command -v conda && conda deactivate; source .venv/
 # upip = "uv pip"
 alias upip="uv pip"
 
-alias make="gmake"
 
 # emulate linux
 function emlinux() {
@@ -70,7 +74,6 @@ function emlinux() {
   docker run -it --rm -v $(pwd):/home/. --name arshan $image sh -c 'shell=`command -v zsh || command -v bash || command -v sh`; eval $shell'
 }
 
-alias sed="gsed"
 
 # for some stupid fuckin reason nillion puts their shit in ~/.zshenv
 # check if file exists and if so, source it
