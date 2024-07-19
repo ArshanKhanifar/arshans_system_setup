@@ -19,16 +19,8 @@ fi
 
 # MacOS specific commands
 if [ `uname -s` = "Linux" ]; then
-  fdocker=`which docker`
-  fkurtosis=`which kurtosis`
-
-  function docker() {
-    sudo $fdocker "$@"
-  }
-
-  function kurtosis() {
-    sudo $fkurtosis "$@"
-  }
+  alias docker='sudo docker'
+  alias kurtosis='sudo kurtosis'
 fi
 
 # for all rust programs
