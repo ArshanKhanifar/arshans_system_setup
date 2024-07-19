@@ -17,6 +17,13 @@ if [ `uname -s` = "Darwin" ]; then
   alias bazel710=/opt/homebrew/Cellar/bazel/7.1.2/libexec/bin/bazel-7.1.0-darwin-arm64
 fi
 
+# MacOS specific commands
+if [ `uname -s` = "Linux" ]; then
+  function docker() {
+    echo "hello"
+  }
+fi
+
 # for all rust programs
 source $HOME/.cargo/env
 
@@ -75,10 +82,16 @@ function emlinux() {
   docker run -it --rm -v $(pwd):/home/. --name arshan $image sh -c 'shell=`command -v zsh || command -v bash || command -v sh`; eval $shell'
 }
 
-
 # for some stupid fuckin reason nillion puts their shit in ~/.zshenv
 # check if file exists and if so, source it
 [ -f ~/.zshenv ] && source ~/.zshenv
+
+fdocker=`which docker`
+fkurtosis=`which kurtosis`
+
+function docker() {
+  if [ `uname -s` = "" ]; then
+}
 
 alias docrm='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
 

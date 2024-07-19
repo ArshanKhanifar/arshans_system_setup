@@ -168,7 +168,6 @@ function configurePromptAndRcfiles() {
     postprompt='%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} "'
     prompt="$preprompt$machine_title$postprompt"
     echo $prompt >> ~/.zshrc;
-    echo 'alias docker="sudo docker"' >> ~/.zshrc
   fi
 }
 
