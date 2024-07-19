@@ -297,7 +297,7 @@ function add_gcp_vms_to_machine_file() {
 }
 
 function docsh() {
-  container_info=`docker container ps | fzf`
+  container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | fzf`
   container_id=`echo $container_info | awk '{print $1}'`
   docker exec -it $container_id /bin/sh
 }
@@ -319,13 +319,6 @@ function docinspect() {
   container_info=`docker container ls --format "{{.ID}}\t{{.Names}}" | fzf`
   container_id=`echo $container_info | awk '{print $1}'`
   docker inspect $container_id | jq -r '.[0].Config.Cmd'
-}
-
-function kubesh() {
-  pod_info=`kubectl get pods --all-namespaces -o wide | fzf`
-  pod_name=`echo $pod_info | awk '{print $2}'`
-  namespace=`echo $pod_info | awk '{print $1}'`
-  kubectl exec -it $pod_name -n $namespace -- /bin/sh
 }
 
 function delete_vm() {
