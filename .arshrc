@@ -19,8 +19,15 @@ fi
 
 # MacOS specific commands
 if [ `uname -s` = "Linux" ]; then
+  fdocker=`which docker`
+  fkurtosis=`which kurtosis`
+
   function docker() {
-    echo "hello"
+    sudo $fdocker "$@"
+  }
+
+  function kurtosis() {
+    sudo $fkurtosis "$@"
   }
 fi
 
@@ -85,13 +92,6 @@ function emlinux() {
 # for some stupid fuckin reason nillion puts their shit in ~/.zshenv
 # check if file exists and if so, source it
 [ -f ~/.zshenv ] && source ~/.zshenv
-
-fdocker=`which docker`
-fkurtosis=`which kurtosis`
-
-function docker() {
-  if [ `uname -s` = "" ]; then
-}
 
 alias docrm='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
 
