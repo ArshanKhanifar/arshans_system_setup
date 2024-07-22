@@ -4,6 +4,7 @@ echo $SHELL
 # MacOS only
 [ -f /opt/homebrew/bin/brew ] && eval "`/opt/homebrew/bin/brew shellenv`"
 
+eval "$(zoxide init zsh)"
 
 export PATH=$PATH:~/.local/bin
 export PATH=$PATH:~/.arshan/bin
@@ -78,7 +79,7 @@ function emlinux() {
   if [ -n "$1" ]; then
     image=$1
   fi
-  docker run -it --rm -v $(pwd):/home/. --name arshan $image sh -c 'shell=`command -v zsh || command -v bash || command -v sh`; eval $shell'
+  docker run -it --rm -v $(pwd):/home/. -w /home/. --name arshan $image sh -c 'shell=`command -v zsh || command -v bash || command -v sh`; eval $shell'
 }
 
 # for some stupid fuckin reason nillion puts their shit in ~/.zshenv
