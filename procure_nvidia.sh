@@ -47,7 +47,10 @@ function installDrivers() {
 
     xst installToolkit
 
-    grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
+    # skip restart prompt
+    if [ -f "/etc/needrestart/needrestart.conf" ]; then
+      grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
+    fi
 
     xst installNvidiaDrivers
 
