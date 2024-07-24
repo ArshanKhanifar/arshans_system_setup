@@ -14,7 +14,6 @@ export PATH=$PATH:/usr/bin
 if [ `uname -s` = "Darwin" ]; then
   alias make="gmake"
   alias sed="gsed"
-  source "$HOME/.rye/env"
   alias bazel710=/opt/homebrew/Cellar/bazel/7.1.2/libexec/bin/bazel-7.1.0-darwin-arm64
 fi
 

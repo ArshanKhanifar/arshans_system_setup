@@ -49,8 +49,6 @@ if ! which sudo 2>&1 > /dev/null; then
   echo "sudo command not found, using direct execution."
 fi
 
-# when debugging this in docker ubuntu
-sudo apt update && sudo apt install -y curl
 
 USER_NAME="arshankhanifar"
 REPO_NAME="arshans_system_setup"
@@ -110,8 +108,12 @@ function installPackages() {
       sudo apt install -y git zsh vim byobu make jq silversearcher-ag
     fi
   else
-    echo "Zsh not installed, please install it before running this script."
-    exit 1
+    # install homebrew
+    if ! which brew 2>&1 > /dev/null; then
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+    # Mac environment
+    brew install git zsh vim byobu make jq the_silver_searcher
   fi
 
   unset DEBIAN_FRONTEND
