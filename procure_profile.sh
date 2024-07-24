@@ -195,6 +195,10 @@ function interactiveCommands() {
 }
 
 function main() {
+  # installing jq, needed for stage utils
+  if [ -z "`command -v jq`" ]; then
+    sudo apt-get install -y jq
+  fi
   xst installPackages
   xst installUV
   xst installZoxide

@@ -19,6 +19,10 @@ function install() {
 }
 
 function main() {
+  # installing jq, needed for stage utils
+  if [ -z "`command -v jq`" ]; then
+    sudo apt-get install -y jq
+  fi
   set -e
   xst install
 }

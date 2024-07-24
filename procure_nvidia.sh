@@ -85,7 +85,7 @@ function setUp() {
 
 function install() {
   set -e
-  sudo apt-get install -y nvidia-container-toolkit git-lfs
+  sudo apt-get install -y nvidia-container-toolkit git-lfs jq
   sudo systemctl restart docker
 }
 
@@ -110,6 +110,10 @@ function verify() {
 
 function main() {
   set -e
+  # installing jq, needed for stage utils
+  if [ -z "`command -v jq`" ]; then
+    sudo apt-get install -y jq
+  fi
   xst setUp $1
   xst install
   xst configure

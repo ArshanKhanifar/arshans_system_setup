@@ -1,6 +1,6 @@
 #!/bin/bash
 
-progress_file=python_setup.json
+progress_file=chaindev_setup.json
 
 function checkStageCompleted() {
   stage=$1;
@@ -41,29 +41,34 @@ function xst() {
 #!/bin/bash
 
 
-if [ "$runtime" = "docker" ]; then
-  sudo() { "$@"; }
-  echo "sudo command not found, using direct execution."
-fi
+progress_file=chaindev.json
 
-function install() {
-  set -e
-  if ! [ "$runtime" = "docker" ]; then
-    grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf;
-  fi
-  sudo apt-get update && sudo apt-get install -y software-properties-common
-  sudo add-apt-repository -y ppa:deadsnakes/ppa
-  sudo apt-get update
-  sudo apt install -y python3.11
+function installKurtosis() {
+  echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+  sudo apt update
+  sudo apt install -y kurtosis-cli
+}
+
+function installRust() {
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+}
+
+function installFoundry() {
+  curl -L https://foundry.paradigm.xyz | bash
+  source ~/.zshenv && foundryup
+}
+
+function installToolchain() {
+  sudo apt update
+  sudo apt install -y libclang-dev pkg-config # yabadava
 }
 
 function main() {
-  # installing jq, needed for stage utils
-  if [ -z "`command -v jq`" ]; then
-    sudo apt-get install -y jq
-  fi
   set -e
-  xst install
+  xst installKurtosis
+  xst installRust
+  xst installFoundry
+  xst installToolchain
 }
 
-main
+main $1

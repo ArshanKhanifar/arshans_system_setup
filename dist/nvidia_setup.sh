@@ -43,18 +43,18 @@ function xst() {
 
 function installHelm() {
     # install helm
-    sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 \
-    && sudo chmod 700 get_helm.sh && sudo ./get_helm.sh
+    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 \
+    && chmod 700 get_helm.sh && ./get_helm.sh
 }
 
 function installNvidiaHelmRepo() {
-    if sudo helm repo list | grep -q nvidia; then
+    if helm repo list | grep -q nvidia; then
       echo "nvidia repo already exists. skipping..."
     else
-        sudo helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+        helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
     fi
 
-    sudo helm repo update
+    helm repo update
 }
 
 function installToolkit() {
@@ -124,7 +124,7 @@ function setUp() {
 
 function install() {
   set -e
-  sudo apt-get install -y nvidia-container-toolkit git-lfs
+  sudo apt-get install -y nvidia-container-toolkit git-lfs jq
   sudo systemctl restart docker
 }
 
@@ -149,6 +149,10 @@ function verify() {
 
 function main() {
   set -e
+  # installing jq, needed for stage utils
+  if [ -z "`command -v jq`" ]; then
+    sudo apt-get install -y jq
+  fi
   xst setUp $1
   xst install
   xst configure

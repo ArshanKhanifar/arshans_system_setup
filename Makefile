@@ -14,4 +14,5 @@ gen-setup-scripts:
 	@make gen-script script=nvidia
 	@make gen-script script=python
 	@make gen-script script=profile
+	@make gen-script script=chaindev
 	@make gen-script script=full

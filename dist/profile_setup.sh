@@ -207,7 +207,6 @@ function configurePromptAndRcfiles() {
     postprompt='%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} "'
     prompt="$preprompt$machine_title$postprompt"
     echo $prompt >> ~/.zshrc;
-    echo 'alias docker="sudo docker"' >> ~/.zshrc
   fi
 }
 
@@ -235,6 +234,10 @@ function interactiveCommands() {
 }
 
 function main() {
+  # installing jq, needed for stage utils
+  if [ -z "`command -v jq`" ]; then
+    sudo apt-get install -y jq
+  fi
   xst installPackages
   xst installUV
   xst installZoxide

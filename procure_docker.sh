@@ -16,7 +16,7 @@ function setUp() {
   grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
 
   sudo apt-get update || true;
-  sudo apt-get install -y ca-certificates curl
+  sudo apt-get install -y ca-certificates curl jq
   sudo install -m 0755 -d /etc/apt/keyrings
   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
   sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -40,6 +40,10 @@ function verify() {
 }
 
 function main() {
+  # installing jq, needed for stage utils
+  if [ -z "`command -v jq`" ]; then
+    sudo apt-get install -y jq
+  fi
   xst uninstall
   xst setUp
   xst install
