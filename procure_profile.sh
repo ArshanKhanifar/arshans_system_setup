@@ -144,6 +144,9 @@ function setupByobu() {
   # create it anyways (in case the above doesn't work - it does not in docker ubuntu)
   mkdir -p ~/.byobu
 
+  # install tmux plugins
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
   # select the backend & switch to screen
   byobu-select-backend tmux
   byobu-ctrl-a screen

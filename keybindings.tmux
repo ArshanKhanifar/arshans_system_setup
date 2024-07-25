@@ -1,12 +1,27 @@
 # This file is now used in byobu, previously it was my .tmux.conf, but now it's under byobu's
 # keybindings.tmux file.
+
+# List of plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-yank'
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run '~/.tmux/plugins/tpm/tpm'
+
+# Set Vim keybindings in copy mode
+setw -g mode-keys vi
+
+# Remap `copy-mode-vi` to start selection and yank like Vim
+bind-key -T copy-mode-vi 'v' send-keys -X begin-selection
+bind-key -T copy-mode-vi 'y' send-keys -X copy-selection-and-cancel
+bind-key -T copy-mode-vi 'Y' send-keys -X copy-selection-and-cancel
+
 unbind-key -n C-b
 
 # for all commands ctrl a is the prefix
 set -g prefix C-Space
 set -g prefix2 F12
 bind C-Space send-prefix
-
 
 # tmux panes 
 # note: definition of "vertical" in tmux is the opposite of vim's

@@ -4,6 +4,8 @@ echo $SHELL
 # MacOS only
 [ -f /opt/homebrew/bin/brew ] && eval "`/opt/homebrew/bin/brew shellenv`"
 
+# zoxide stuff
+export PATH=$PATH:$HOME/.local/bin
 eval "$(zoxide init zsh)"
 
 export PATH=$PATH:~/.local/bin
