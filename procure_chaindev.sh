@@ -17,6 +17,8 @@ function installRust() {
 function installFoundry() {
   curl -L https://foundry.paradigm.xyz | bash
   source ~/.zshenv && foundryup
+  # cast completions
+  cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
 }
 
 function installToolchain() {
