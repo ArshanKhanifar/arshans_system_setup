@@ -133,8 +133,9 @@ function installFoundry() {
   fi
   foundryup
   # cast completions
-  mkdir -p $HOME/.oh-my-zsh/completions
-  cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
+#  TODO: figure out why this doesn't work
+#  mkdir -p $HOME/.oh-my-zsh/completions
+#  cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
 }
 
 function installZoxide() {
