@@ -121,8 +121,6 @@ function watchoor() {
 
   echo "src_path: $src_path"
   if ! eval "select_machine"; then echo "command was not successful"; return; fi
-  keypath=`echo $machine | cut -d ' ' -f1`
-  hostname=`echo $machine | cut -d ' ' -f2`
 
   ssh -i $keypath $hostname "mkdir -p $dst_path"
 
@@ -142,7 +140,7 @@ function watchoor() {
     echo $excludes
   ' _ "$paths"`
 
-  sync_command="rsync -avz -e \"ssh -i $keypath\" \"$src_path\" $excludes \"$hostname:$dst_path\""
+  sync_command="rsync -avz -e \"ssh -i $keypath $additional_flags\" \"$src_path\" $excludes \"$hostname:$dst_path\""
 
   echo "sync command: 🐸"
   echo $sync_command
@@ -203,15 +201,11 @@ function sshh() {
 
 function scpull() {
   if ! eval "select_machine"; then echo "command was not successful"; return; fi
-  keypath=`echo $machine | cut -d ' ' -f1`
-  hostname=`echo $machine | cut -d ' ' -f2`
   scp -i $keypath $hostname:$1 $2
 }
 
 function scpush() {
   if ! eval "select_machine"; then echo "command was not successful"; return; fi
-  keypath=`echo $machine | cut -d ' ' -f1`
-  hostname=`echo $machine | cut -d ' ' -f2`
   scp -i $keypath $1 $hostname:$2
 }
 
