@@ -126,12 +126,7 @@ function installUV() {
 
 function installFoundry() {
   curl -L https://foundry.paradigm.xyz | bash
-  if [ "$shell" = "bash" ]; then
-    source ~/.bashrc
-  else
-    source ~/.zshrc
-  fi
-  foundryup || true
+  ~/.foundry/bin/foundryup
   # cast completions
 #  TODO: figure out why this doesn't work
 #  mkdir -p $HOME/.oh-my-zsh/completions
