@@ -9,7 +9,7 @@ fi
 
 function install() {
   set -e
-  if ! [ "$runtime" = "docker" ]; then
+  if ! [ "$runtime" = "docker" ] && [ -f "/etc/needrestart/needrestart.conf" ]; then
     grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf;
   fi
   sudo apt-get update && sudo apt-get install -y software-properties-common

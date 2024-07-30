@@ -124,6 +124,13 @@ function installUV() {
   curl -LsSf https://astral.sh/uv/install.sh | sh
 }
 
+function installFoundry() {
+  curl -L https://foundry.paradigm.xyz | bash
+  source ~/.zshenv && foundryup
+  # cast completions
+  cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
+}
+
 function installZoxide() {
   # install zoxide
   curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
@@ -182,6 +189,9 @@ function setupByobu() {
   byobu kill-session -t temp
   # create it anyways (in case the above doesn't work - it does not in docker ubuntu)
   mkdir -p ~/.byobu
+
+  # install tmux plugins
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
   # select the backend & switch to screen
   byobu-select-backend tmux
@@ -242,6 +252,7 @@ function main() {
   fi
   xst installPackages
   xst installUV
+  xst installFoundry
   xst installZoxide
   xst installOhMyZsh
   xst cloneRepo
