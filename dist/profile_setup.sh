@@ -131,7 +131,7 @@ function installFoundry() {
   else
     source ~/.zshrc
   fi
-  foundryup
+  foundryup || true
   # cast completions
 #  TODO: figure out why this doesn't work
 #  mkdir -p $HOME/.oh-my-zsh/completions
