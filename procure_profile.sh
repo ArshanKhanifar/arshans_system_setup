@@ -94,6 +94,7 @@ function installFoundry() {
   fi
   foundryup
   # cast completions
+  mkdir -p $HOME/.oh-my-zsh/completions
   cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
 }
 

@@ -133,6 +133,7 @@ function installFoundry() {
   fi
   foundryup
   # cast completions
+  mkdir -p $HOME/.oh-my-zsh/completions
   cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
 }
 
@@ -257,9 +258,9 @@ function main() {
   fi
   xst installPackages
   xst installUV
-  xst installFoundry
   xst installZoxide
   xst installOhMyZsh
+  xst installFoundry
   xst cloneRepo
   xst setupVim
   xst setupByobu
