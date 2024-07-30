@@ -87,7 +87,12 @@ function installUV() {
 
 function installFoundry() {
   curl -L https://foundry.paradigm.xyz | bash
-  source ~/.zshenv && foundryup
+  if [ "$shell" = "bash" ]; then
+    source ~/.bashrc
+  else
+    source ~/.zshrc
+  fi
+  foundryup
   # cast completions
   cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
 }
