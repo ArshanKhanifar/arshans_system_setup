@@ -122,7 +122,7 @@ function watchoor() {
   echo "src_path: $src_path"
   if ! eval "select_machine"; then echo "command was not successful"; return; fi
 
-  ssh -i $keypath $hostname "mkdir -p $dst_path"
+  eval "ssh -i $keypath $hostname $additional_flags \"mkdir -p $dst_path\""
 
   always_ignore=".git .venv .idea"
 
