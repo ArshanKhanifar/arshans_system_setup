@@ -218,9 +218,9 @@ function main() {
   fi
   xst installPackages
   xst installUV
-  xst installFoundry
   xst installZoxide
   xst installOhMyZsh
+  xst installFoundry
   xst cloneRepo
   xst setupVim
   xst setupByobu
