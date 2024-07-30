@@ -120,7 +120,7 @@ function watchoor() {
   dst_path="~/synced/"
 
   echo "src_path: $src_path"
-  if ! machine=`select_machine`; then return; fi
+  if ! eval "select_machine"; then echo "command was not successful"; return; fi
   keypath=`echo $machine | cut -d ' ' -f1`
   hostname=`echo $machine | cut -d ' ' -f2`
 
@@ -190,26 +190,26 @@ function select_machine() {
   if [ -z "$machine" ]; then return 1; fi;
   keyfile=`echo $machine | awk '{print $2}'`
   hostname=`echo $machine | awk '{print $3}'`
+  additional_flags=`echo $machine | awk -F '"' '{print $2}'`
   keypath="$keyfile"
-  echo "$keypath $hostname"
 }
 
 function sshh() {
-  if ! machine=`select_machine`; then echo "command was not successful"; return; fi
-  keypath=`echo $machine | cut -d ' ' -f1`
-  hostname=`echo $machine | cut -d ' ' -f2`
-  ssh -o StrictHostKeyChecking=no -i $keypath $hostname
+  if ! eval "select_machine"; then echo "command was not successful"; return; fi
+  cmd="ssh -o StrictHostKeyChecking=no -i $keyfile $hostname $additional_flags"
+  echo $cmd
+  eval $cmd
 }
 
 function scpull() {
-  if ! machine=`select_machine`; then echo "command was not successful"; return; fi
+  if ! eval "select_machine"; then echo "command was not successful"; return; fi
   keypath=`echo $machine | cut -d ' ' -f1`
   hostname=`echo $machine | cut -d ' ' -f2`
   scp -i $keypath $hostname:$1 $2
 }
 
 function scpush() {
-  if ! machine=`select_machine`; then echo "command was not successful"; return; fi
+  if ! eval "select_machine"; then echo "command was not successful"; return; fi
   keypath=`echo $machine | cut -d ' ' -f1`
   hostname=`echo $machine | cut -d ' ' -f2`
   scp -i $keypath $1 $hostname:$2
