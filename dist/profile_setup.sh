@@ -248,8 +248,7 @@ function interactiveCommands() {
 }
 
 function installAwsCli() {
-  curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
-  sudo installer -pkg AWSCLIV2.pkg -target /
+  sudo apt install awscli -y
 }
 
 function main() {

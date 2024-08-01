@@ -74,11 +74,12 @@ function setUp() {
 function install() {
   set -e;
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin;
+
 }
 
 function verify() {
   set -e;
-  sudo docker run hello-world
+  docker run hello-world
 }
 
 function main() {
@@ -89,6 +90,7 @@ function main() {
   xst uninstall
   xst setUp
   xst install
+  sudo usermod -aG docker $USER
   xst verify
 }
 
