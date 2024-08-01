@@ -28,6 +28,11 @@ fi
 # for all rust programs
 source $HOME/.cargo/env
 
+# import rye if it exists
+if [ -d "$HOME/.rye" ]; then
+  source "$HOME/.rye/env";
+fi
+
 # nvm stuff (imports if exists)
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
