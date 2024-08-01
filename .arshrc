@@ -9,7 +9,7 @@ export PATH=$PATH:$HOME/.local/bin
 eval "$(zoxide init zsh)"
 
 export PATH=$PATH:~/.local/bin
-export PATH=$PATH:~/.arshan/bin
+export PATH=~/.arshan/bin:$PATH
 export PATH=$PATH:/usr/bin
 
 # MacOS specific commands
