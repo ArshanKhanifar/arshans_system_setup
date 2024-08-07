@@ -35,12 +35,13 @@ function setUp() {
 function install() {
   set -e;
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin;
-
 }
 
 function verify() {
   set -e;
-  docker run hello-world
+  # user's already added to docker group, but it won't take effect until next login
+  # at this stage we'll just verify that docker is working
+  sudo docker run hello-world
 }
 
 function main() {

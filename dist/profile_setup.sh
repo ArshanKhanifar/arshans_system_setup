@@ -216,7 +216,6 @@ function configurePromptAndRcfiles() {
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
     sudo chsh -s /bin/zsh `whoami`;
     sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="zhann"/' ~/.zshrc;
-    echo 'export MACHINE_TITLE=pp1' >> ~/.zshrc;
     preprompt='PROMPT="%(?:%{$fg_bold[green]%}%1{'
     postprompt='%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} "'
     prompt="$preprompt$machine_title$postprompt"
