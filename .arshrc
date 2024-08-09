@@ -217,10 +217,12 @@ function scpush() {
   scp -i $keypath $1 $hostname:$2
 }
 
+podinfo_columns="HOST_NAME:.spec.nodeName,NAME:.metadata.name,NAMESPACE:.metadata.namespace,STATUS:.status.phase,HOST_IP:.status.hostIP,IP:.status.podIP"
+
 function poddescribe() {
-  line=`kubectl get pods --all-namespaces -o wide | fzf`
+  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
   pod=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $1}'`
+  namespace=`echo $line | awk '{print $3}'`
   echo "kubectl describe pod $pod --namespace=$namespace"
   kubectl describe pod $pod --namespace=$namespace
 }
@@ -231,9 +233,9 @@ function nodedescribe() {
 }
 
 function poddelete() {
-  line=`kubectl get pods --all-namespaces -o wide | fzf`
+  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
   pod=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $1}'`
+  namespace=`echo $line | awk '{print $3}'`
   kubectl delete pod $pod --namespace=$namespace
 }
 
@@ -250,9 +252,9 @@ function delete_node() {
 }
 
 function podlogs() {
-  line=`kubectl get pods --all-namespaces -o wide | fzf`
+  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
   pod=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $1}'`
+  namespace=`echo $line | awk '{print $3}'`
   kubectl logs $pod -n $namespace "$@";
 }
 
@@ -319,9 +321,9 @@ function doclogs() {
 }
 
 function podsh() {
-  pod_info=`kubectl get pods --all-namespaces -o wide | fzf`
-  pod_name=`echo $pod_info | awk '{print $2}'`
-  namespace=`echo $pod_info | awk '{print $1}'`
+  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
+  pod_name=`echo $line | awk '{print $2}'`
+  namespace=`echo $line | awk '{print $3}'`
   kubectl exec -it $pod_name -n $namespace -- /bin/sh
 }
 
