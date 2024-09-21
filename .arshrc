@@ -255,7 +255,8 @@ function podlogs() {
   line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
   pod=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $3}'`
-  kubectl logs $pod -n $namespace "$@";
+#  kubectl logs -f "$pod" -n "$namespace" "$@"
+  eval "kubectl logs -f $pod -n $namespace $@"
 }
 
 function create_vm() {
@@ -320,6 +321,21 @@ function doclogs() {
   docker logs -f $container_id
 }
 
+function podcurl() {
+  kubectl run curl-pod --rm -it --image=curlimages/curl --restart=Never -- sh
+}
+
+function podtop() {
+  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
+  pod_name=`echo $line | awk '{print $2}'`
+  namespace=`echo $line | awk '{print $3}'`
+  watch -n 1 kubectl top pod $pod_name -n $namespace
+}
+
+function curlbn() {
+  curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' $1
+}
+
 function podsh() {
   line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
   pod_name=`echo $line | awk '{print $2}'`
@@ -333,16 +349,39 @@ function docinspect() {
   docker inspect $container_id | jq -r '.[0].Config.Cmd'
 }
 
-function delete_vm() {
-  line=`gcloud compute instances list | fzf`
-  instance_name=`echo $line | awk '{print $1}'`
-  instance_zone=`echo $line | awk '{print $2}'`
-  echo "Deleting instance $instance_name in zone $instance_zone"
-  if [ "$1" = "-q" ]; then
-    gcloud compute instances delete $instance_name -q --zone=$instance_zone 2>&1 > /dev/null &
-  else
-    gcloud compute instances delete $instance_name --zone=$instance_zone
-  fi
-  sed -i "\|$instance_name|d" $MACHINE_FILEPATH
+function vmdelete() {
+  rm /tmp/gcp-machines.txt
+  gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
+  while IFS= read -r line; do
+    instance_name=`echo $line | awk '{print $1}'`
+    instance_zone=`echo $line | awk '{print $2}'`
+    echo "Deleting instance $instance_name in zone $instance_zone"
+    if [ "$1" = "-q" ]; then
+      gcloud compute instances delete $instance_name -q --zone=$instance_zone 2>&1 > /dev/null &
+    else
+      gcloud compute instances delete $instance_name --zone=$instance_zone
+    fi
+    sed -i "\|$instance_name|d" $MACHINE_FILEPATH
+  done < /tmp/gcp-machines.txt
 }
 
+function vmdescribe() {
+  line=`gcloud compute instances list | fzf`
+  vm=`echo $line | awk '{print $1}'`
+  zone=`echo $line | awk '{print $2}'`
+  gcloud compute instances describe $vm --zone=$zone
+}
+
+function delete_firewalls() {
+  rm /tmp/gcp-firewalls.txt
+  gcloud compute firewall-rules list | fzf -m > /tmp/gcp-firewalls.txt
+  while IFS= read -r line; do
+    firewall_name=`echo $line | awk '{print $1}'`
+    echo "Deleting firewall $firewall_name"
+    if [ "$1" = "-q" ]; then
+      gcloud compute firewall-rules delete $firewall_name -q 2>&1 > /dev/null &
+    else
+      gcloud compute firewall-rules delete $firewall_name
+    fi
+  done < /tmp/gcp-firewalls.txt
+}
