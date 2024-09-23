@@ -176,17 +176,27 @@ function watchoor() {
     ' _ "$src_path" "$keypath" "$hostname" "$dst_path" "$excludes"
   }
 
-  _sync > /dev/null 2>&1 & sync_pid=`expr $! + 2`
+  _sync > /dev/null 2>&1 &
+
+  sync_pid=`ps aux | grep "$src_path" | grep "$hostname" | grep -v grep | awk '{print $2}' | head -n 1`
 
   echo "$sync_pid $keypath $hostname $src_path $dst_path " >> ~/watchoors
 }
 
 function get_watchoors() {
+  while IFS= read -r line; do
+    pid=`echo $line | awk '{print $1}'`
+    if [ -z "$pid" ]; then continue; fi;
+    if ! ps -p $pid > /dev/null; then
+      sed -i "\|$pid|d" ~/watchoors
+    fi
+  done < ~/watchoors
   cat ~/watchoors
 }
 
 function kill_watchoor() {
   watchoor_pid=`get_watchoors | fzf | awk '{print $1}'`
+  if [ -z "$watchoor_pid" ]; then return 1; fi;
   kill $watchoor_pid
   sed -i "\|^$watchoor_pid|d" ~/watchoors
 }
