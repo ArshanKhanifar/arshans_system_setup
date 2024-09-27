@@ -95,14 +95,25 @@ function emlinux() {
 # check if file exists and if so, source it
 [ -f ~/.zshenv ] && source ~/.zshenv
 
-alias docrm='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
+alias docrmall='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
 
-function dockill() {
+function selectContainer() {
   container_info=`docker container ps | fzf`;
   if [ -z $container_info ]; then
     echo "no container specified";
     return 1;
   fi;
+  echo $container_info
+}
+
+function docrm() {
+  container_info=`selectContainer`
+  container_id=`echo $container_info | awk '{print $1}'`;
+  docker kill $container_id && docker rm $container_id
+}
+
+function dockill() {
+  container_info=`selectContainer`
   container_id=`echo $container_info | awk '{print $1}'`;
   docker kill $container_id;
 }
