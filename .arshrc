@@ -22,11 +22,14 @@ if [ `uname -s` = "Darwin" ]; then
   alias bazel710=/opt/homebrew/Cellar/bazel/7.1.2/libexec/bin/bazel-7.1.0-darwin-arm64
 fi
 
-# MacOS specific commands
+# Linux specific commands
 if [ `uname -s` = "Linux" ]; then
-  alias docker='sudo docker'
   alias kurtosis='sudo kurtosis'
 fi
+
+function setupPermissions() {
+  sudo usermod -aG docker `whoami`
+}
 
 # for all rust programs
 source $HOME/.cargo/env

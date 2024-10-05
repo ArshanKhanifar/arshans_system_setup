@@ -70,6 +70,22 @@ function installToolkit() {
     echo $cuda_path >> ~/.bashrc
 }
 
+function installNvidiaDriversAndPurge() {
+  sudo apt-mark unhold "cuda*" "libnvidia*" "nvidia*"
+  sudo apt purge '^nvidia-.*' -y
+  sudo apt purge '^libnvidia-.*' -y
+  sudo apt purge '^xserver-xorg-video-nvidia-.*' -y
+  sudo apt autoremove -y
+
+  sudo apt -y install aptitude
+  sudo aptitude install -y  libnvidia-common-555
+
+  sudo apt-get update
+  sudo apt-get install -y libnvidia-common-555
+  sudo apt-get install -y nvidia-driver-555-open
+  sudo apt-get install -y cuda-drivers-555
+}
+
 function installNvidiaDrivers() {
     # this requires a reboot I think
     sudo apt-get update
@@ -78,10 +94,17 @@ function installNvidiaDrivers() {
     sudo apt-get install -y cuda-drivers-555
 }
 
+function installNvidiaDriversLatest() {
+    # this requires a reboot I think
+    sudo apt-get update
+    sudo apt-get install -y libnvidia-common-560
+    sudo apt-get install -y nvidia-driver-560-open
+    sudo apt-get install -y cuda-drivers-560
+}
+
 function installDrivers() {
   set -e
-  if [ -z "`command -v nvidia-smi`" ] || \
-    ! nvidia-smi --query-gpu=driver_version --format=csv,noheader | grep -q "555"; then
+  if [ -z "`command -v nvidia-smi`" ] || ! nvidia-smi --query-gpu=driver_version --format=csv,noheader | grep -q "555"; then
     echo "nvidia-smi did not succeed, installing NVIDIA drivers..."
 
     xst installToolkit
