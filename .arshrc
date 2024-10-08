@@ -194,7 +194,7 @@ function watchoor() {
 
   sync_pid=`ps aux | grep "$src_path" | grep "$hostname" | grep -v grep | awk '{print $2}' | head -n 1`
 
-  echo "$sync_pid $keypath $hostname $src_path $dst_path " >> ~/watchoors
+  echo "$sync_pid $machine_name $keypath $hostname $src_path $dst_path " >> ~/watchoors
 }
 
 function get_watchoors() {
@@ -218,6 +218,7 @@ function kill_watchoor() {
 function select_machine() {
   machine=`cat $MACHINE_FILEPATH | fzf`
   if [ -z "$machine" ]; then return 1; fi;
+  machine_name=`echo $machine | awk '{print $1}'`
   keyfile=`echo $machine | awk '{print $2}'`
   hostname=`echo $machine | awk '{print $3}'`
   additional_flags=`echo $machine | awk -F '"' '{print $2}'`
