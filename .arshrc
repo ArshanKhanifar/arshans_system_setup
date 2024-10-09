@@ -244,12 +244,25 @@ function scpush() {
 
 podinfo_columns="HOST_NAME:.spec.nodeName,NAME:.metadata.name,NAMESPACE:.metadata.namespace,STATUS:.status.phase,HOST_IP:.status.hostIP,IP:.status.podIP"
 
-function poddescribe() {
+function pod_info() {
   line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
+  if [ -z "$line" ]; then return 1; fi;
   pod=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $3}'`
+}
+
+function poddescribe() {
+  set -e
+  pod_info
   echo "kubectl describe pod $pod --namespace=$namespace"
   kubectl describe pod $pod --namespace=$namespace
+}
+
+function poddescribew() {
+  set -e
+  pod_info
+  echo "kubectl describe pod $pod --namespace=$namespace"
+  watch -n 1 -cd "kubectl describe pod $pod --namespace=$namespace"
 }
 
 function nodedescribe() {
