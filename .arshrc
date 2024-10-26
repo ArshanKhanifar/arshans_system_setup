@@ -101,24 +101,36 @@ function emlinux() {
 alias docrmall='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
 
 function selectContainer() {
-  container_info=`docker container ps | fzf`;
+  if [ -z $1 ]; then
+    container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | fzf`;
+  else
+    container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | grep $1 | head -n 1`;
+  fi
   if [ -z $container_info ]; then
     echo "no container specified";
     return 1;
   fi;
-  echo $container_info
+  container_id=`echo $container_info | awk '{print $1}'`
 }
 
 function docrm() {
-  container_info=`selectContainer`
-  container_id=`echo $container_info | awk '{print $1}'`;
+  selectContainer "$@"
   docker kill $container_id && docker rm $container_id
 }
 
 function dockill() {
-  container_info=`selectContainer`
-  container_id=`echo $container_info | awk '{print $1}'`;
+  selectContainer "$@"
   docker kill $container_id;
+}
+
+function docsh() {
+  selectContainer "$@"
+  docker exec -it $container_id /bin/sh
+}
+
+function doclogs() {
+  selectContainer "$@"
+  docker logs -f $container_id
 }
 
 # qcom: "this is a quick commit"
@@ -139,7 +151,12 @@ function watchoor() {
   src_path=`pwd`/$src_path
   src_path=`realpath $src_path`
   dirname=`basename $src_path`
-  dst_path="~/synced/"
+
+  if [ -n "$3" ]; then
+    dst_path=$3
+  else
+    dst_path="~/synced/"
+  fi
 
   echo "src_path: $src_path"
   if ! eval "select_machine"; then echo "command was not successful"; return; fi
@@ -253,16 +270,21 @@ function pod_info() {
 
 function poddescribe() {
   set -e
-  pod_info
+  if ! pod_info; then return; fi
   echo "kubectl describe pod $pod --namespace=$namespace"
   kubectl describe pod $pod --namespace=$namespace
 }
 
 function poddescribew() {
   set -e
-  pod_info
+  if ! pod_info; then return; fi
   echo "kubectl describe pod $pod --namespace=$namespace"
-  watch -n 1 -cd "kubectl describe pod $pod --namespace=$namespace"
+  if [ -n "$1" ]; then
+    num_lines=$1
+  else
+    num_lines=10
+  fi
+  watch -n 1 -cd "kubectl describe pod $pod --namespace=$namespace | tail -n $num_lines"
 }
 
 function nodedescribe() {
@@ -347,17 +369,6 @@ function add_gcp_vms_to_machine_file() {
   rm /tmp/machines
 }
 
-function docsh() {
-  container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | fzf`
-  container_id=`echo $container_info | awk '{print $1}'`
-  docker exec -it $container_id /bin/sh
-}
-
-function doclogs() {
-  container_info=`docker container ps | fzf`
-  container_id=`echo $container_info | awk '{print $1}'`
-  docker logs -f $container_id
-}
 
 function podcurl() {
   kubectl run curl-pod --rm -it --image=curlimages/curl --restart=Never -- sh
