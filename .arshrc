@@ -261,23 +261,14 @@ function scpush() {
 
 podinfo_columns="HOST_NAME:.spec.nodeName,NAME:.metadata.name,NAMESPACE:.metadata.namespace,STATUS:.status.phase,HOST_IP:.status.hostIP,IP:.status.podIP"
 
-function pod_info() {
-  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
-  if [ -z "$line" ]; then return 1; fi;
-  pod=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $3}'`
-}
-
 function poddescribe() {
-  set -e
-  if ! pod_info; then return; fi
+  if ! selectPod "$@"; then return; fi
   echo "kubectl describe pod $pod --namespace=$namespace"
   kubectl describe pod $pod --namespace=$namespace
 }
 
 function poddescribew() {
-  set -e
-  if ! pod_info; then return; fi
+  if ! selectPod "$@"; then return; fi
   echo "kubectl describe pod $pod --namespace=$namespace"
   if [ -n "$1" ]; then
     num_lines=$1
@@ -312,10 +303,7 @@ function delete_node() {
 }
 
 function podlogs() {
-  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
-  pod=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $3}'`
-#  kubectl logs -f "$pod" -n "$namespace" "$@"
+  if ! selectPod "$@"; then return; fi
   eval "kubectl logs -f $pod -n $namespace $@"
 }
 
@@ -375,9 +363,7 @@ function podcurl() {
 }
 
 function podtop() {
-  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
-  pod_name=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $3}'`
+  if ! selectPod "$@"; then return; fi
   watch -n 1 kubectl top pod $pod_name -n $namespace
 }
 
@@ -385,10 +371,19 @@ function curlbn() {
   curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' $1
 }
 
-function podsh() {
-  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
+function selectPod() {
+  if [ -z $1 ]; then
+    line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`;
+  else
+    line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | grep $1 | head -n 1`;
+  fi
+  if [ -z "$line" ]; then return 1; fi;
   pod_name=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $3}'`
+}
+
+function podsh() {
+  if ! selectPod "$@"; then return; fi
   kubectl exec -it $pod_name -n $namespace -- /bin/sh
 }
 
