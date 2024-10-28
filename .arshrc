@@ -364,7 +364,7 @@ function podcurl() {
 
 function podtop() {
   if ! selectPod "$@"; then return; fi
-  watch -n 1 kubectl top pod $pod_name -n $namespace
+  watch -n 1 kubectl top pod $pod -n $namespace
 }
 
 function curlbn() {
@@ -378,13 +378,13 @@ function selectPod() {
     line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | grep $1 | head -n 1`;
   fi
   if [ -z "$line" ]; then return 1; fi;
-  pod_name=`echo $line | awk '{print $2}'`
+  pod=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $3}'`
 }
 
 function podsh() {
   if ! selectPod "$@"; then return; fi
-  kubectl exec -it $pod_name -n $namespace -- /bin/sh
+  kubectl exec -it $pod -n $namespace -- /bin/sh
 }
 
 function docinspect() {
