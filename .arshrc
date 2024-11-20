@@ -1,5 +1,4 @@
 #!/bin/bash
-echo $SHELL
 
 # MacOS only
 [ -f /opt/homebrew/bin/brew ] && eval "`/opt/homebrew/bin/brew shellenv`"
@@ -39,10 +38,14 @@ if [ -d "$HOME/.rye" ]; then
   source "$HOME/.rye/env";
 fi
 
-# nvm stuff (imports if exists)
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+function loadnvm() {
+  # nvm stuff (imports if exists)
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+  
+  echo "✅ loaded nvm"
+}
 
 
 function gitritual() {
@@ -76,10 +79,14 @@ function gitpersonal() {
 }
 
 # suv = start uv
-alias suv="command -v conda && conda deactivate; source .venv/bin/activate"
+# for when you have conda activated
+#alias suv="command -v conda && conda deactivate; source .venv/bin/activate"
+# without conda activated by default
+alias suv="source .venv/bin/activate"
 
 # snuv = "start new uv"
-alias snuv="uv venv -p 3.11; command -v conda && conda deactivate; source .venv/bin/activate"
+#alias snuv="uv venv -p 3.11; command -v conda && conda deactivate; source .venv/bin/activate"
+alias snuv="uv venv -p 3.11; source .venv/bin/activate"
 
 # upip = "uv pip"
 alias upip="uv pip"
@@ -304,7 +311,7 @@ function delete_node() {
 
 function podlogs() {
   if ! selectPod "$@"; then return; fi
-  eval "kubectl logs -f $pod -n $namespace $@"
+  eval "kubectl logs -f $pod -n $namespace ${@:2}"
 }
 
 function create_vm() {
@@ -429,3 +436,4 @@ function delete_firewalls() {
     fi
   done < /tmp/gcp-firewalls.txt
 }
+
