@@ -38,6 +38,11 @@ function xst() {
   fi;
   setStageCompleted $stage;
 };
+
+if ! which sudo 2>&1 > /dev/null; then
+  sudo() { "$@"; }
+  echo "sudo command not found, using direct execution."
+fi
 #!/bin/bash
 
 function main() {
