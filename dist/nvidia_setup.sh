@@ -41,6 +41,11 @@ function xst() {
 #!/bin/bash
 
 
+if ! which sudo 2>&1 > /dev/null; then
+  sudo() { "$@"; }
+  echo "sudo command not found, using direct execution."
+fi
+
 function installHelm() {
     # install helm
     curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 \
