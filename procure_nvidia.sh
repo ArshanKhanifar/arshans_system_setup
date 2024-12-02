@@ -140,6 +140,16 @@ function main() {
   if [ -z "`command -v jq`" ]; then
     sudo apt-get install -y jq
   fi
+
+  if command -v docker > /dev/null \
+    && sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi > /dev/null 2>&1 \
+    && command -v ctr > /dev/null \
+    && sudo ctr image pull docker.io/library/ubuntu:latest \
+    && sudo ctr run --rm --gpus 0 -t docker.io/library/ubuntu:latest wagwan nvidia-smi > /dev/null 2>&1; then
+    echo "🎉 NVIDIA container toolkit already installed"
+    return
+  fi
+
   xst setUp $1
   xst install
   xst configure

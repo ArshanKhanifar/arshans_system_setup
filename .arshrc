@@ -437,3 +437,4 @@ function delete_firewalls() {
   done < /tmp/gcp-firewalls.txt
 }
 
+alias sl="echo 🚂"

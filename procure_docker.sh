@@ -46,9 +46,15 @@ function verify() {
 
 function main() {
   # installing jq, needed for stage utils
+  if command -v docker > /dev/null && sudo docker run hello-world > /dev/null 2>&1; then
+    echo "Docker is installed and running. Exiting early."
+    return
+  fi
+
   if [ -z "`command -v jq`" ]; then
     sudo apt-get install -y jq
   fi
+
   xst uninstall
   xst setUp
   xst install
