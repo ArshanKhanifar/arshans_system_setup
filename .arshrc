@@ -31,7 +31,7 @@ function setupPermissions() {
 }
 
 # for all rust programs
-source $HOME/.cargo/env
+[ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
 
 # import rye if it exists
 if [ -d "$HOME/.rye" ]; then
@@ -138,6 +138,11 @@ function docsh() {
 function doclogs() {
   selectContainer "$@"
   docker logs -f $container_id
+}
+
+function docinspect() {
+  selectContainer "$@"
+  docker inspect $container_id
 }
 
 # qcom: "this is a quick commit"
