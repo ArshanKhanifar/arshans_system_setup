@@ -94,6 +94,14 @@ function installFoundry() {
 #  cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
 }
 
+function installBat() {
+  if [ "`uname -s`" == "Darwin" ]; then
+    brew install bat
+  else
+    sudo apt install -y bat
+  fi
+}
+
 function installZoxide() {
   # install zoxide
   curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
@@ -219,6 +227,7 @@ function main() {
   xst installPackages
   xst installUV
   xst installZoxide
+  xst installBat
   xst installOhMyZsh
   xst installFoundry
   xst cloneRepo
