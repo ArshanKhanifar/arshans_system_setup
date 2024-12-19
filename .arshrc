@@ -159,8 +159,9 @@ function docsh() {
 }
 
 function doclogs() {
+  rest="${@:2}";
   selectContainer "$@"
-  docker logs -f $container_id
+  eval "docker logs -f $container_id $rest"
 }
 
 function docinspect() {
@@ -435,11 +436,7 @@ function vmdelete() {
     instance_name=`echo $line | awk '{print $1}'`
     instance_zone=`echo $line | awk '{print $2}'`
     echo "Deleting instance $instance_name in zone $instance_zone"
-    if [ "$1" = "-q" ]; then
-      gcloud compute instances delete $instance_name -q --zone=$instance_zone 2>&1 > /dev/null &
-    else
-      gcloud compute instances delete $instance_name --zone=$instance_zone
-    fi
+    gcloud compute instances delete $instance_name -q --zone=$instance_zone 2>&1 > /dev/null &
     sed -i "\|$instance_name|d" $MACHINE_FILEPATH
   done < /tmp/gcp-machines.txt
 }
@@ -451,17 +448,14 @@ function vmdescribe() {
   gcloud compute instances describe $vm --zone=$zone
 }
 
-function delete_firewalls() {
+# delete gcp firewalls
+function fwdelete() {
   rm /tmp/gcp-firewalls.txt
   gcloud compute firewall-rules list | fzf -m > /tmp/gcp-firewalls.txt
   while IFS= read -r line; do
     firewall_name=`echo $line | awk '{print $1}'`
     echo "Deleting firewall $firewall_name"
-    if [ "$1" = "-q" ]; then
-      gcloud compute firewall-rules delete $firewall_name -q 2>&1 > /dev/null &
-    else
-      gcloud compute firewall-rules delete $firewall_name
-    fi
+    gcloud compute firewall-rules delete $firewall_name -q 2>&1 > /dev/null &
   done < /tmp/gcp-firewalls.txt
 }
 
