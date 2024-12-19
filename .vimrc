@@ -10,6 +10,12 @@ set t_Co=256
 syntax on
 colorscheme heman
 
+# highlight when searching
+set hlsearch
+
+# automatically jump to section when searching
+set incsearch
+
 " column width checking
 set colorcolumn=80
 
