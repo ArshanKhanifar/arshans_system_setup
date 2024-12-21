@@ -19,10 +19,10 @@ if [ `uname -s` = "Darwin" ]; then
   alias make="gmake"
   alias sed="gsed"
   alias bazel710=/opt/homebrew/Cellar/bazel/7.1.2/libexec/bin/bazel-7.1.0-darwin-arm64
+  alias cat="bat"
 fi
 
 alias sl="echo 🚂"
-alias cat="bat"
 
 # Linux specific commands
 if [ `uname -s` = "Linux" ]; then
