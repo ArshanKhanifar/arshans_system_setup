@@ -187,6 +187,7 @@ MACHINE_FILEPATH=`echo ~/remote-machines.txt`
 function watchoor() {
   src_path=$1
   ignore_path=$2
+
   src_path=`pwd`/$src_path
   src_path=`realpath $src_path`
   dirname=`basename $src_path`
@@ -272,7 +273,11 @@ function kill_watchoor() {
 }
 
 function select_machine() {
-  machine=`cat $MACHINE_FILEPATH | fzf`
+  if [ -z "$1" ]; then
+    machine=`cat $MACHINE_FILEPATH | fzf`
+  else
+    machine=`cat $MACHINE_FILEPATH | grep $1 | head -n 1`
+  fi
   if [ -z "$machine" ]; then return 1; fi;
   machine_name=`echo $machine | awk '{print $1}'`
   keyfile=`echo $machine | awk '{print $2}'`
@@ -543,5 +548,14 @@ function fwallow() {
   done < /tmp/gcp-machines.txt
 }
 
+function removetags() {
+  rm /tmp/gcp-machines.txt
+  gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
+  while IFS= read -r line; do
+    instance_name=`echo $line | awk '{print $1}'`
+    instance_zone=`echo $line | awk '{print $2}'`
+    gcloud compute instances remove-tags $instance_name -q --zone=$instance_zone --tags $1 2>&1 > /dev/null &
+  done < /tmp/gcp-machines.txt
+}
 
 
