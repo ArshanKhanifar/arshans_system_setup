@@ -322,12 +322,6 @@ function nodedescribe() {
   kubectl describe node $node
 }
 
-function poddelete() {
-  line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`
-  pod=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $3}'`
-  kubectl delete pod $pod --namespace=$namespace
-}
 
 function delete_service() {
   line=`kubectl get services --all-namespaces -o wide | fzf`
@@ -344,6 +338,11 @@ function nodedelete() {
 function podlogs() {
   if ! selectPod "$@"; then return; fi
   eval "kubectl logs -f $pod -n $namespace ${@:2}"
+}
+
+function poddelete() {
+  if ! selectPod "$@"; then return; fi
+  kubectl delete pod $pod --namespace=$namespace
 }
 
 function create_vm() {
@@ -406,6 +405,43 @@ function podtop() {
   watch -n 1 kubectl top pod $pod -n $namespace
 }
 
+default_rpc="http://127.0.0.1:8545"
+
+function ethArgs() {
+  rpc=$default_rpc
+  method_name="eth_blockNumber"
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --rpc)
+        rpc=$2
+        shift 2
+        ;;
+      --method)
+        method_name=$2
+        shift 2
+        ;;
+      --params)
+        params=$2
+        shift 2
+        ;;
+    esac
+  done
+}
+
+function ethrpc() {
+  ethArgs "$@"
+  data="{\"jsonrpc\":\"2.0\",\"method\":\"$method_name\",\"params\":[$params],\"id\":1}"
+  curl -sX POST -H "Content-Type: application/json" --data "$data" $rpc | jq ".result"
+}
+
+# from here: https://geth.ethereum.org/docs/interacting-with-geth/rpc/ns-admin
+function gethpeers() {
+  rpc=$1
+  if [ -z $rpc ]; then rpc=$default_rpc; fi;
+  ethrpc --method admin_peers --rpc $rpc
+}
+
 function curlbn() {
   curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' $1
 }
@@ -444,6 +480,40 @@ function vmdelete() {
   done < /tmp/gcp-machines.txt
 }
 
+function vmcreate() {
+  instance_name=$1
+  zone=northamerica-northeast1-a;
+  machine_type=n2-standard-8
+
+  if [ -z "$instance_name" ]; then instance_name="henlo"; fi;
+
+  if gcloud compute instances list | grep -q $instance_name; then
+    echo "Instance $instance_name already exists"
+    return 1;
+  fi;
+
+  gcloud compute instances create $instance_name --zone $zone \
+    --machine-type $machine_type \
+    --image-family=ubuntu-2204-lts \
+    --image-project=ubuntu-os-cloud \
+    --boot-disk-size=200 \
+    --tags=http-server \
+    --restart-on-failure
+
+  ssh_key=~/.ssh/arshan.pub;
+
+	gcloud compute instances add-metadata $instance_name \
+	  --zone=$zone \
+	  --metadata=ssh-keys="ritual:`cat $ssh_key`";
+}
+
+function copysetup() {
+  name=$1
+  if [ -z "$name" ]; then name="hello"; fi;
+  url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/profile_setup.sh"
+  echo "curl -fsSL $url | bash -s -- $name" | pbcopy
+}
+
 function vmdescribe() {
   line=`gcloud compute instances list | fzf`
   vm=`echo $line | awk '{print $1}'`
@@ -461,4 +531,17 @@ function fwdelete() {
     gcloud compute firewall-rules delete $firewall_name -q 2>&1 > /dev/null &
   done < /tmp/gcp-firewalls.txt
 }
+
+function fwallow() {
+  rm /tmp/gcp-machines.txt
+  gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
+  while IFS= read -r line; do
+    instance_name=`echo $line | awk '{print $1}'`
+    instance_zone=`echo $line | awk '{print $2}'`
+    echo "Allowing everything on instance $instance_name in zone $instance_zone"
+    gcloud compute instances add-tags $instance_name -q --zone=$instance_zone --tags=allow-everything 2>&1 > /dev/null &
+  done < /tmp/gcp-machines.txt
+}
+
+
 
