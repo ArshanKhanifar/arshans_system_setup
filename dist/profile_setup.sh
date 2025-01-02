@@ -152,6 +152,11 @@ function installBat() {
   if [ "`uname -s`" == "Darwin" ]; then
     brew install bat
   else
+    source /etc/os-release
+    if [ "$ID" = "amzn" ]; then
+        echo "skipping installation for Amazon Linux"
+        return 0
+    fi
     eval "sudo ${LINUX_INSTALLER} install -y bat"
   fi
 }
