@@ -72,7 +72,9 @@ MACHINE_LINUX="Linux"
 ARCHITECTURE_ARM64="arm64"
 
 architecture="$(uname -m)"
+
 unameOut="$(uname -s)"
+
 case "${unameOut}" in
     Linux*)     machine=$MACHINE_LINUX;;
     Darwin*)    machine=$MACHINE_MAC;;
@@ -81,6 +83,30 @@ case "${unameOut}" in
     *)          machine="UNKNOWN:${unameOut}"
 esac
 
+if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+  source /etc/os-release
+  case "${ID}" in
+    ubuntu)
+      LINUX_INSTALLER="apt-get"
+      ;;
+    debian)
+      apt-get update
+      LINUX_INSTALLER="apt-get"
+      ;;
+    alpine)
+      apk update
+      LINUX_INSTALLER="apk"
+      ;;
+    amzn)
+      LINUX_INSTALLER="yum"
+      ;;
+    *)
+      echo "Unsupported Linux distribution: ${ID}"
+      exit 1
+      ;;
+  esac
+fi
+
 function installPackages() {
   # for some packages that require user input
   DEBIAN_FRONTEND=noninteractive
@@ -88,29 +114,13 @@ function installPackages() {
   # install packages
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
     if [ "${ENVIRONMENT}" = "docker" ]; then
-      if [ -f "/etc/os-release" ]; then
-        # Detect the Linux distribution
-        source /etc/os-release
-        if [ "${ID}" = "alpine" ]; then
-          apk update
-          apk add --no-cache git zsh vim byobu make jq
-        else
-          # non-alpine, so debian-based
-          apt-get update
-          apt-get install -y git-core zsh vim byobu make jq silversearcher-ag
-        fi
-      else
-        echo "Unable to determine the Linux distribution. Zsh not installed."
-        exit 1
-      fi
+      eval "${LINUX_INSTALLER} install -y git zsh vim byobu make jq"
     else
       # skip restart prompt
       if [ -f "/etc/needrestart/needrestart.conf" ]; then
         grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
       fi
-      # non-docker linux environment (right now I only support debian)
-      sudo apt update
-      sudo apt install -y git zsh vim byobu make jq silversearcher-ag
+      eval "sudo ${LINUX_INSTALLER} install -y git zsh vim byobu make jq silversearcher-ag"
     fi
   else
     # install homebrew
@@ -136,6 +146,14 @@ function installFoundry() {
 #  TODO: figure out why this doesn't work
 #  mkdir -p $HOME/.oh-my-zsh/completions
 #  cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
+}
+
+function installBat() {
+  if [ "`uname -s`" == "Darwin" ]; then
+    brew install bat
+  else
+    sudo apt install -y bat
+  fi
 }
 
 function installZoxide() {
@@ -263,6 +281,7 @@ function main() {
   xst installPackages
   xst installUV
   xst installZoxide
+  xst installBat
   xst installOhMyZsh
   xst installFoundry
   xst cloneRepo
