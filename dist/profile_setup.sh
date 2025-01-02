@@ -152,7 +152,7 @@ function installBat() {
   if [ "`uname -s`" == "Darwin" ]; then
     brew install bat
   else
-    sudo apt install -y bat
+    eval "sudo ${LINUX_INSTALLER} install -y bat"
   fi
 }
 
