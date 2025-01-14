@@ -167,6 +167,8 @@ function setupVim() {
 }
 
 function setupByobu() {
+  # to install byobu on amzn: https://blog.programster.org/amazon-linux-install-byobu
+
   # set up byobu
   export BYOBU_BACKEND=tmux
 
@@ -198,6 +200,8 @@ function configurePromptAndRcfiles() {
 
   # For unix-like systems, change the shell to zsh
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+    # NOTE: aws linux doesn't have this
+    # https://stackoverflow.com/questions/17126051/how-to-change-shell-on-amazon-ec2-linux-instance
     sudo chsh -s /bin/zsh `whoami`;
     sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="zhann"/' ~/.zshrc;
     preprompt='PROMPT="%(?:%{$fg_bold[green]%}%1{'

@@ -124,7 +124,13 @@ function emlinux() {
   if [ -n "$1" ]; then
     image=$1
   fi
-  docker run -it --rm -v $(pwd):/home/. -w /home/. --name arshan $image sh -c 'shell=`command -v zsh || command -v bash || command -v sh`; eval $shell'
+  docker run -it --rm \
+    --entrypoint "" \
+    -v $(pwd):/home/. \
+    -w /home/. \
+    --name arshan \
+    $image \
+    sh -c 'shell=$(command -v zsh bash || command -v sh); eval $shell'
 }
 
 # for some stupid fuckin reason nillion puts their shit in ~/.zshenv
@@ -133,42 +139,89 @@ function emlinux() {
 
 alias docrmall='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
 
-function selectContainer() {
+function selectContainers() {
   if [ -z $1 ]; then
-    container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | fzf`;
+    container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | fzf -m`;
   else
-    container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | grep $1 | head -n 1`;
+    container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | grep $1`;
   fi
   if [ -z $container_info ]; then
     echo "no container specified";
     return 1;
   fi;
-  container_id=`echo $container_info | awk '{print $1}'`
+  container_ids=`echo $container_info | awk '{print $1}'`
+  container_names=`echo $container_info | awk '{print $2}'`
+
+  # take the first one
+  container_id=`echo $container_ids | head -n 1`;
+  container_name=`echo $container_names | head -n 1`;
 }
 
 function docrm() {
-  selectContainer "$@"
+  selectContainers "$@"
   docker kill $container_id && docker rm $container_id
 }
 
 function dockill() {
-  selectContainer "$@"
+  selectContainers "$@"
   docker kill $container_id;
 }
 
 function docsh() {
-  selectContainer "$@"
+  selectContainers "$@"
   docker exec -it $container_id /bin/sh
 }
 
+function doctest() {
+  selectContainers "$@"
+}
+
+function parseCommonLogs() {
+  while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --filter)
+      filter=$2
+      shift
+      ;;
+    --tail)
+      tail=$2
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+  done
+}
+
+
+function doclogsm() {
+  parseCommonLogs "$@";
+  selectContainers "$@"
+
+  # Loop through containers and append container name to logs
+  num_lines=`echo $container_ids | wc -w | xargs`
+
+  cmd="multitail"
+
+  for i in `seq 1 $num_lines`; do
+    container_id=`echo $container_ids | head -n $i | tail -n 1`
+    cmd="$cmd -l \"docker logs -f $container_id --tail $tail | grep -i \\\"$filter\\\" \""
+  done
+
+#  echo "$cmd"
+  eval "$cmd"
+}
+
+
 function doclogs() {
   rest="${@:2}";
-  selectContainer "$@"
+  selectContainers "$@"
   eval "docker logs -f $container_id $rest"
 }
 
 function docinspect() {
-  selectContainer "$@"
+  selectContainers "$@"
   docker inspect $container_id
 }
 
