@@ -110,10 +110,13 @@ fi
 function installPackages() {
   # for some packages that require user input
   DEBIAN_FRONTEND=noninteractive
+  echo "Using installer: $LINUX_INSTALLER"
 
   # install packages
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+    # all linux machines
     if [ "${ENVIRONMENT}" = "docker" ]; then
+      # docker machines
       eval "${LINUX_INSTALLER} install -y git zsh vim byobu make jq"
     else
       # skip restart prompt
@@ -282,11 +285,37 @@ function installAwsCli() {
   sudo apt install awscli -y
 }
 
+function updatePackageManager() {
+  case "${LINUX_INSTALLER}" in
+    apt-get)
+      sudo apt-get update
+      ;;
+    yum)
+      sudo yum update
+      ;;
+    apk)
+      sudo apk update
+      ;;
+    *)
+      echo "Unsupported package manager: ${LINUX_INSTALLER}"
+      exit 1
+      ;;
+  esac
+}
+
+function ensureJq() {
+  if [ -z "`command -v jq`" ]; then
+    # use the LINUX_INSTALLER to install
+    eval "sudo ${LINUX_INSTALLER} install -y jq"
+  fi
+}
+
+
+
 function main() {
   # installing jq, needed for stage utils
-  if [ -z "`command -v jq`" ]; then
-    sudo apt-get update && sudo apt-get install -y jq
-  fi
+  updatePackageManager
+  ensureJq
   xst installPackages
   xst installUV
   xst installZoxide
