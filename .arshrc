@@ -4,9 +4,23 @@
 [ -f /opt/homebrew/bin/brew ] && eval "`/opt/homebrew/bin/brew shellenv`"
 
 # zoxide stuff
-export PATH=$PATH:$HOME/.local/bin
-eval "$(zoxide init zsh)"
+if command -v zoxide > /dev/null; then
+  # if $0 is a shell: i.e. zsh, bash use those. Otherwise, fallback to $SHELL
+  case "$0" in
+    *zsh)
+      shell=zsh
+      ;;
+    *bash)
+      shell=bash
+      ;;
+    *)
+      shell=`basename $SHELL`
+      ;;
+  esac
+  eval "`zoxide init $shell`"
+fi
 
+export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:~/.local/bin
 export PATH=~/.arshan/bin:$PATH
 export PATH=$PATH:/usr/bin
@@ -538,31 +552,86 @@ function vmdelete() {
   done < /tmp/gcp-machines.txt
 }
 
+function parseVmArgs() {
+  instance_name="henlo"
+  while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --tdx)
+      tdx=true
+      shift
+      ;;
+    --name)
+      instance_name=$2
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+  done
+}
+
 function vmcreate() {
-  instance_name=$1
+  parseVmArgs "$@"
+
   zone=northamerica-northeast1-a;
   machine_type=n2-standard-8
+  extra_args=""
+  image_family=ubuntu-2204-lts
+  disk_size=200
 
-  if [ -z "$instance_name" ]; then instance_name="henlo"; fi;
+  if [ -n "$tdx" ]; then
+    zone=us-central1-a
+    machine_type=c3-standard-4
+    extra_args="--confidential-compute-type=TDX"
+    # tdx instances require this, see: https://cloud.google.com/confidential-computing/confidential-vm/docs/create-a-confidential-vm-instance
+    extra_args="$extra_args --maintenance-policy=TERMINATE"
+    # canonical tdx requires 24.04 https://github.com/canonical/tdx
+    # full details around os: https://cloud.google.com/compute/docs/images/os-details
+    image_family=ubuntu-2404-lts-amd64
+  fi;
 
-  if gcloud compute instances list | grep -q $instance_name; then
+  if gcloud compute instances list | grep -q "$instance_name"; then
     echo "Instance $instance_name already exists"
     return 1;
   fi;
 
-  gcloud compute instances create $instance_name --zone $zone \
-    --machine-type $machine_type \
-    --image-family=ubuntu-2204-lts \
-    --image-project=ubuntu-os-cloud \
-    --boot-disk-size=200 \
-    --tags=http-server \
-    --restart-on-failure
+  cmd="gcloud compute instances create $instance_name --zone $zone"
+  cmd="$cmd --machine-type $machine_type"
+  cmd="$cmd --image-family=$image_family"
+  cmd="$cmd --image-project=ubuntu-os-cloud"
+  cmd="$cmd --boot-disk-size=$disk_size"
+  cmd="$cmd --tags=http-server"
+  cmd="$cmd --restart-on-failure"
+  cmd="$cmd $extra_args"
+
+  if ! eval $cmd; then
+    echo "❌ Failed to create instance $instance_name"
+    return 1;
+  fi;
 
   ssh_key=~/.ssh/arshan.pub;
 
 	gcloud compute instances add-metadata $instance_name \
 	  --zone=$zone \
 	  --metadata=ssh-keys="ritual:`cat $ssh_key`";
+}
+
+function vmserial() {
+  line=`gcloud compute instances list | fzf`
+  vm=`echo $line | awk '{print $1}'`
+  zone=`echo $line | awk '{print $2}'`
+  gcloud compute connect-to-serial-port $vm --zone=$zone
+}
+
+function vmaddserial() {
+  rm /tmp/gcp-machines.txt
+  gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
+  while IFS= read -r line; do
+    instance_name=`echo $line | awk '{print $1}'`
+    instance_zone=`echo $line | awk '{print $2}'`
+    gcloud compute instances add-metadata $instance_name --zone=$instance_zone --metadata serial-port-enable=1 &
+  done < /tmp/gcp-machines.txt
 }
 
 function copysetup() {
