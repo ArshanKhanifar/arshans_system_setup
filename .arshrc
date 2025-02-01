@@ -10,14 +10,15 @@ if command -v zoxide > /dev/null; then
     *zsh)
       shell=zsh
       ;;
-    *bash)
+    *bash*)
       shell=bash
       ;;
     *)
       shell=`basename $SHELL`
       ;;
   esac
-  eval "`zoxide init $shell`"
+  # eval "`zoxide init $shell`"
+  eval "`zoxide init bash`"
 fi
 
 export PATH=$PATH:$HOME/.local/bin
@@ -227,6 +228,22 @@ function doclogsm() {
   eval "$cmd"
 }
 
+copyprompt() {
+  prompt_pattern=$1
+  prompt_dir=~/.prompts
+  
+  if [ -z "$prompt_pattern" ]; then
+    files=`ls $prompt_dir/ | fzf -m`
+  else
+    files=`ls $prompt_dir/ | grep -i "$prompt_pattern"`
+  fi
+
+  echo "$files" | while read -r file; do
+    echo "Copying $file"
+    cat "$prompt_dir/$file"
+    echo -e "\n"
+  done | pbcopy
+}
 
 function doclogs() {
   rest="${@:2}";
@@ -355,7 +372,7 @@ function select_machine() {
 
 function sshh() {
   if ! eval "select_machine"; then echo "command was not successful"; return; fi
-  cmd="ssh -o StrictHostKeyChecking=no -i $keyfile $hostname $additional_flags"
+  cmd="ssh -i $keyfile $hostname $additional_flags"
   echo $cmd
   eval $cmd
 }
@@ -394,17 +411,21 @@ function nodedescribe() {
   kubectl describe node $node
 }
 
+function nodedelete() {
+  nodes=$(kubectl get nodes -o wide | fzf -m | awk '{print $1}')
+  echo "$nodes" | while read -r node; do
+    if [ ! -z "$node" ]; then
+      echo "Deleting node: $node"
+      kubectl delete node "$node"
+    fi
+  done
+}
 
 function delete_service() {
   line=`kubectl get services --all-namespaces -o wide | fzf`
   service=`echo $line | awk '{print $2}'`
   namespace=`echo $line | awk '{print $1}'`
   kubectl delete service $service --namespace=$namespace
-}
-
-function nodedelete() {
-  node=`kubectl get nodes -o wide | fzf |awk '{print $1}'`
-  kubectl delete node $node
 }
 
 function podlogs() {
@@ -571,6 +592,8 @@ function parseVmArgs() {
   done
 }
 
+
+# usage: vmcreate --tdx --name <name>
 function vmcreate() {
   parseVmArgs "$@"
 
@@ -680,4 +703,25 @@ function removetags() {
   done < /tmp/gcp-machines.txt
 }
 
+# delete gcp networks
+function nwdelete() {
+  rm /tmp/gcp-networks.txt
+  gcloud compute networks list | fzf -m > /tmp/gcp-networks.txt
+  while IFS= read -r line; do
+    network_name=`echo $line | awk '{print $1}'`
+    echo "Deleting network $network_name"
+    gcloud compute networks delete $network_name -q 2>&1 > /dev/null &
+  done < /tmp/gcp-networks.txt
+}
 
+# delete gcp subnetworks
+function snwdelete() {
+  rm /tmp/gcp-subnetworks.txt
+  gcloud compute networks subnets list | fzf -m > /tmp/gcp-subnetworks.txt
+  while IFS= read -r line; do
+    subnetwork_name=`echo $line | awk '{print $1}'`
+    region=`echo $line | awk '{print $2}'`
+    echo "Deleting subnetwork $subnetwork_name in region $region"
+    gcloud compute networks subnets delete $subnetwork_name --region=$region -q 2>&1 > /dev/null &
+  done < /tmp/gcp-subnetworks.txt
+}
