@@ -1,11 +1,24 @@
 #!/bin/bash
+# Get the directory of this script, works in both bash and zsh
+if [ -n "${BASH_SOURCE[0]}" ]; then
+    ARSH_RC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+else
+    ARSH_RC_DIR="$( cd "$( dirname "${(%):-%N}" )" >/dev/null 2>&1 && pwd )"
+fi
+
+source "$ARSH_RC_DIR/utilities.sh"
+source "$ARSH_RC_DIR/docker_utils.sh"
+source "$ARSH_RC_DIR/git_utils.sh"
+source "$ARSH_RC_DIR/sync_utils.sh"
+source "$ARSH_RC_DIR/prompt_utils.sh"
+source "$ARSH_RC_DIR/gcloud_utils.sh"
+source "$ARSH_RC_DIR/kubernetes_utils.sh"
 
 # MacOS only
 [ -f /opt/homebrew/bin/brew ] && eval "`/opt/homebrew/bin/brew shellenv`"
 
 # zoxide stuff
 if command -v zoxide > /dev/null; then
-  # if $0 is a shell: i.e. zsh, bash use those. Otherwise, fallback to $SHELL
   case "$0" in
     *zsh)
       shell=zsh
@@ -21,7 +34,6 @@ if command -v zoxide > /dev/null; then
   eval "`zoxide init bash`"
 fi
 
-export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:~/.local/bin
 export PATH=~/.arshan/bin:$PATH
 export PATH=$PATH:/usr/bin
@@ -65,296 +77,22 @@ function loadnvm() {
   echo "✅ loaded nvm"
 }
 
-
-function gitritual() {
-  cp ~/.ssh/config.ritual ~/.ssh/config;
-  ssh-add -D;
-  email="arshan@ritual.net"
-  git config --global user.name 'arshan-ritual';
-  git config --global user.email $email;
-  signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
-  git config --global --replace-all user.signingkey $signing_key;
-}
-
-function gitorigin() {
-  cp ~/.ssh/config.origin ~/.ssh/config;
-  ssh-add -D;
-  email="arshan+origin@ritual.net"
-  git config --global user.name 'arshan-origin';
-  git config --global user.email $email;
-  signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
-  git config --global --replace-all user.signingkey $signing_key;
-}
-
-function gitpersonal() {
-  cp ~/.ssh/config.personal ~/.ssh/config;
-  ssh-add -D;
-  email="arshankhanifar@gmail.com"
-  git config --global user.name 'arshankhanifar';
-  git config --global user.email $email;
-  signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
-  git config --global --replace-all user.signingkey $signing_key;
-}
-
 # suv = start uv
 function suv() {
-  command -v conda && conda deactivate;
-  source .venv/bin/activate;
-#  dir=.pyenv/$version
-#  if [ ! -d $dir ]; then
-#    echo "directory $dir does not exist";
-#    return 1;
-#  fi;
-#  command -v conda && conda deactivate;
-#  source $dir/.venv/bin/activate;
-#  # link .venv to $dir/.venv
-#  rm -rf .venv
-#  ln -s $dir/.venv .venv
+  command -v conda && conda deactivate
+  source .venv/bin/activate
 }
 
 # snuv = "start new uv"
 function snuv() {
   version=${1:-"3.11"}
-  uv venv -p $version;
-  command -v conda && conda deactivate;
-  source .venv/bin/activate;
-#  dir=.pyenv/$version
-#  mkdir -p $dir && cd $dir
-#    uv venv -p $version;
-#  cd ../..
-#  command -v conda && conda deactivate;
-#  source $dir/.venv/bin/activate;
-#  # link .venv to $dir/.venv
-#  rm -rf .venv
-#  ln -s $dir/.venv .venv
+  uv venv -p $version
+  command -v conda && conda deactivate
+  source .venv/bin/activate
 }
-
 
 # upip = "uv pip"
 alias upip="uv pip"
-
-# emulate linux
-function emlinux() {
-  image="arshankhanifar/profile:latest"
-  if [ -n "$1" ]; then
-    image=$1
-  fi
-  docker run -it --rm \
-    --entrypoint "" \
-    -v $(pwd):/home/. \
-    -w /home/. \
-    --name arshan \
-    $image \
-    sh -c 'shell=$(command -v zsh bash || command -v sh); eval $shell'
-}
-
-# for some stupid fuckin reason nillion puts their shit in ~/.zshenv
-# check if file exists and if so, source it
-[ -f ~/.zshenv ] && source ~/.zshenv
-
-alias docrmall='docker kill `docker ps -aq` || true && docker rm `docker ps -aq` || true'
-
-function selectContainers() {
-  if [ -z $1 ]; then
-    container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | fzf -m`;
-  else
-    container_info=`docker container ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}" | grep $1`;
-  fi
-  if [ -z $container_info ]; then
-    echo "no container specified";
-    return 1;
-  fi;
-  container_ids=`echo $container_info | awk '{print $1}'`
-  container_names=`echo $container_info | awk '{print $2}'`
-
-  # take the first one
-  container_id=`echo $container_ids | head -n 1`;
-  container_name=`echo $container_names | head -n 1`;
-}
-
-function docrm() {
-  selectContainers "$@"
-  docker kill $container_id && docker rm $container_id
-}
-
-function dockill() {
-  selectContainers "$@"
-  docker kill $container_id;
-}
-
-function docsh() {
-  selectContainers "$@"
-  docker exec -it $container_id /bin/sh
-}
-
-function doctest() {
-  selectContainers "$@"
-}
-
-function parseCommonLogs() {
-  while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --filter)
-      filter=$2
-      shift
-      ;;
-    --tail)
-      tail=$2
-      shift
-      ;;
-    *)
-      shift
-      ;;
-  esac
-  done
-}
-
-
-function doclogsm() {
-  parseCommonLogs "$@";
-  selectContainers "$@"
-
-  # Loop through containers and append container name to logs
-  num_lines=`echo $container_ids | wc -w | xargs`
-
-  cmd="multitail"
-
-  for i in `seq 1 $num_lines`; do
-    container_id=`echo $container_ids | head -n $i | tail -n 1`
-    cmd="$cmd -l \"docker logs -f $container_id --tail $tail | grep -i \\\"$filter\\\" \""
-  done
-
-#  echo "$cmd"
-  eval "$cmd"
-}
-
-copyprompt() {
-  prompt_pattern=$1
-  prompt_dir=~/.prompts
-  
-  if [ -z "$prompt_pattern" ]; then
-    files=`ls $prompt_dir/ | fzf -m`
-  else
-    files=`ls $prompt_dir/ | grep -i "$prompt_pattern"`
-  fi
-
-  echo "$files" | while read -r file; do
-    echo "Copying $file"
-    cat "$prompt_dir/$file"
-    echo -e "\n"
-  done | pbcopy
-}
-
-function doclogs() {
-  rest="${@:2}";
-  selectContainers "$@"
-  eval "docker logs -f $container_id $rest"
-}
-
-function docinspect() {
-  selectContainers "$@"
-  docker inspect $container_id
-}
-
-# qcom: "this is a quick commit"
-function qcom() {
-  git commit -am $1
-}
-
-# qcomp: "this is a quick commit & push"
-function qcomp() {
-  git commit -am $1 && git push
-}
-
-MACHINE_FILEPATH=`echo ~/remote-machines.txt`
-
-function watchoor() {
-  src_path=$1
-  ignore_path=$2
-
-  src_path=`pwd`/$src_path
-  src_path=`realpath $src_path`
-  dirname=`basename $src_path`
-
-  if [ -n "$3" ]; then
-    dst_path=$3
-  else
-    dst_path="~/synced/"
-  fi
-
-  echo "src_path: $src_path"
-  if ! eval "select_machine"; then echo "command was not successful"; return; fi
-
-  eval "ssh -i $keypath $hostname $additional_flags \"mkdir -p $dst_path\""
-
-  always_ignore=".git .venv .idea"
-
-  paths="$ignore_path $EXCLUDE_PATH $always_ignore"
-
-  if [ -f $src_path/.gitignore ] && [ -n "$USE_GITIGNORE" ]; then
-    paths+="`cat $src_path/.gitignore | grep -vE '(#|\*|~$)' | tr '\n' ' '`";
-  fi;
-
-  excludes=`bash -c '
-    excludes=""
-    for item in $1; do
-      excludes+="--exclude $item "
-    done
-    echo $excludes
-  ' _ "$paths"`
-
-  sync_command="rsync -avz -e \"ssh -i $keypath $additional_flags\" \"$src_path\" $excludes \"$hostname:$dst_path\""
-
-  echo "sync command: 🐸"
-  echo $sync_command
-
-  eval $sync_command
-
-  function _sync() {
-    fswatch -0 "$src_path" | xargs -0 -n 1 -I {} bash -c '
-      function sync_event {
-        local src_path=$1
-        local keypath=$2
-        local hostname=$3
-        local dst_path=$4
-        local excludes=$5
-
-        echo "Detected change in $src_path"
-
-        sync_command="rsync -avz -e \"ssh -i $keypath\" \"$src_path\" $excludes \"$hostname:$dst_path\""
-
-        eval $sync_command
-
-        echo "Done syncing to $hostname"
-      }
-      sync_event "$1" "$2" "$3" "$4" "$5"
-    ' _ "$src_path" "$keypath" "$hostname" "$dst_path" "$excludes"
-  }
-
-  _sync > /dev/null 2>&1 &
-
-  sync_pid=`ps aux | grep "$src_path" | grep "$hostname" | grep -v grep | awk '{print $2}' | head -n 1`
-
-  echo "$sync_pid $machine_name $keypath $hostname $src_path $dst_path " >> ~/watchoors
-}
-
-function get_watchoors() {
-  while IFS= read -r line; do
-    pid=`echo $line | awk '{print $1}'`
-    if [ -z "$pid" ]; then continue; fi;
-    if ! ps -p $pid > /dev/null; then
-      sed -i "\|$pid|d" ~/watchoors
-    fi
-  done < ~/watchoors
-  cat ~/watchoors
-}
-
-function kill_watchoor() {
-  watchoor_pid=`get_watchoors | fzf | awk '{print $1}'`
-  if [ -z "$watchoor_pid" ]; then return 1; fi;
-  kill $watchoor_pid
-  sed -i "\|^$watchoor_pid|d" ~/watchoors
-}
 
 function select_machine() {
   if [ -z "$1" ]; then
@@ -387,116 +125,9 @@ function scpush() {
   rsync -avz -e "ssh -i $keypath" $1 $hostname:$2
 }
 
-podinfo_columns="HOST_NAME:.spec.nodeName,NAME:.metadata.name,NAMESPACE:.metadata.namespace,STATUS:.status.phase,HOST_IP:.status.hostIP,IP:.status.podIP"
-
-function poddescribe() {
-  if ! selectPod "$@"; then return; fi
-  echo "kubectl describe pod $pod --namespace=$namespace"
-  kubectl describe pod $pod --namespace=$namespace
-}
-
-function poddescribew() {
-  if ! selectPod "$@"; then return; fi
-  echo "kubectl describe pod $pod --namespace=$namespace"
-  if [ -n "$1" ]; then
-    num_lines=$1
-  else
-    num_lines=10
-  fi
-  watch -n 1 -cd "kubectl describe pod $pod --namespace=$namespace | tail -n $num_lines"
-}
-
-function nodedescribe() {
-  node=`kubectl get nodes -o wide | fzf | awk '{print $1}'`
-  kubectl describe node $node
-}
-
-function nodedelete() {
-  nodes=$(kubectl get nodes -o wide | fzf -m | awk '{print $1}')
-  echo "$nodes" | while read -r node; do
-    if [ ! -z "$node" ]; then
-      echo "Deleting node: $node"
-      kubectl delete node "$node"
-    fi
-  done
-}
-
-function delete_service() {
-  line=`kubectl get services --all-namespaces -o wide | fzf`
-  service=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $1}'`
-  kubectl delete service $service --namespace=$namespace
-}
-
-function podlogs() {
-  if ! selectPod "$@"; then return; fi
-  eval "kubectl logs -f $pod -n $namespace ${@:2}"
-}
-
-function poddelete() {
-  if ! selectPod "$@"; then return; fi
-  kubectl delete pod $pod --namespace=$namespace
-}
-
-function create_vm() {
-  if [ -z "$1" ]; then
-    echo "Please provide a machine type"
-    return
-  fi
-	zone_line=`gcloud compute zones list | fzf `;
-	zone=`echo $zone_line | awk '{print $1}'`;
-	region=`echo $zone_line | awk '{print $2}'`;
-	echo "Creating instance in zone: $zone & region: $region";
-	instance_name=$(prefix)-$zone;
-	output=`gcloud compute instances create $instance_name \
-	  --zone=$zone \
-	  --machine-type=$1 \
-	  --image-family=debian-10 \
-	  --image-project=debian-cloud \
-	  --tags=http-server`;
-	ip=`echo $output | grep RUNNING | awk '{print $5}'`;
-	echo "$instance_name gcp-ritual $ip" >> $MACHINE_FILEPATH;
-}
-
-function add_to_machine_file() {
-  filename=$1
-  # note: for looping over space-separated values don't work the same way in zsh,
-  # this should work both in bash and zsh
-  ip_addresses=(`cat $filename | awk '{print $4}' | tr '\n' ' '`);
-  for ip in "${ip_addresses[@]}"; do
-    name=`cat $filename | grep $ip | awk '{print $1}'`
-    ssh_user=`cat $filename | grep $ip | awk '{print $2}'`
-    ssh_key=`cat $filename | grep $ip | awk '{print $3}'`
-    sed -i "\|$ip|d" $MACHINE_FILEPATH
-    echo "$name $ssh_key $ssh_user@$ip" >> $MACHINE_FILEPATH
-  done
-}
-
-function add_gcp_vms_to_machine_file() {
-  gcloud compute instances list > /tmp/allmachines
-  if [ -z "$1" ] && [ "$1" = "auto" ]; then
-    cat /tmp/allmachines > /tmp/machines
-  else
-    cat /tmp/allmachines | fzf -m > /tmp/machines
-  fi;
-  ip_addresses=`cat /tmp/machines | awk '{print $5}'`
-  for ip in $ip_addresses; do
-		ssh-keygen -R $ip && ssh-keyscan -H $ip >> ~/.ssh/known_hosts 2>&1 > /dev/null
-    sed -i "\|$ip|d" $MACHINE_FILEPATH
-  done
-  cat /tmp/machines | awk '{print $1 " ~/.ssh/arshan ritual@" $5}' >> $MACHINE_FILEPATH
-  rm /tmp/machines
-}
-
-
-function podcurl() {
-  kubectl run curl-pod --rm -it --image=curlimages/curl --restart=Never -- sh
-}
-
-function podtop() {
-  if ! selectPod "$@"; then return; fi
-  watch -n 1 kubectl top pod $pod -n $namespace
-}
+# for some stupid fuckin reason nillion puts their shit in ~/.zshenv
+# check if file exists and if so, source it
+[ -f ~/.zshenv ] && source ~/.zshenv
 
 default_rpc="http://127.0.0.1:8545"
 
@@ -531,197 +162,10 @@ function ethrpc() {
 # from here: https://geth.ethereum.org/docs/interacting-with-geth/rpc/ns-admin
 function gethpeers() {
   rpc=$1
-  if [ -z $rpc ]; then rpc=$default_rpc; fi;
+  if [ -z $rpc ]; then rpc=$default_rpc; fi
   ethrpc --method admin_peers --rpc $rpc
 }
 
 function curlbn() {
   curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' $1
-}
-
-function selectPod() {
-  if [ -z $1 ]; then
-    line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | fzf`;
-  else
-    line=`kubectl get pods --all-namespaces -o custom-columns=$podinfo_columns | grep $1 | head -n 1`;
-  fi
-  if [ -z "$line" ]; then return 1; fi;
-  pod=`echo $line | awk '{print $2}'`
-  namespace=`echo $line | awk '{print $3}'`
-}
-
-function podsh() {
-  if ! selectPod "$@"; then return; fi
-  kubectl exec -it $pod -n $namespace -- /bin/sh
-}
-
-function docinspect() {
-  container_info=`docker container ls --format "{{.ID}}\t{{.Names}}" | fzf`
-  container_id=`echo $container_info | awk '{print $1}'`
-  docker inspect $container_id | jq -r '.[0].Config.Cmd'
-}
-
-function vmdelete() {
-  rm /tmp/gcp-machines.txt
-  gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
-  while IFS= read -r line; do
-    instance_name=`echo $line | awk '{print $1}'`
-    instance_zone=`echo $line | awk '{print $2}'`
-    echo "Deleting instance $instance_name in zone $instance_zone"
-    gcloud compute instances delete $instance_name -q --zone=$instance_zone 2>&1 > /dev/null &
-    sed -i "\|$instance_name|d" $MACHINE_FILEPATH
-  done < /tmp/gcp-machines.txt
-}
-
-function parseVmArgs() {
-  instance_name="henlo"
-  while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --tdx)
-      tdx=true
-      shift
-      ;;
-    --name)
-      instance_name=$2
-      shift 2
-      ;;
-    *)
-      shift
-      ;;
-  esac
-  done
-}
-
-
-# usage: vmcreate --tdx --name <name>
-function vmcreate() {
-  parseVmArgs "$@"
-
-  zone=northamerica-northeast1-a;
-  machine_type=n2-standard-8
-  extra_args=""
-  image_family=ubuntu-2204-lts
-  disk_size=200
-
-  if [ -n "$tdx" ]; then
-    zone=us-central1-a
-    machine_type=c3-standard-4
-    extra_args="--confidential-compute-type=TDX"
-    # tdx instances require this, see: https://cloud.google.com/confidential-computing/confidential-vm/docs/create-a-confidential-vm-instance
-    extra_args="$extra_args --maintenance-policy=TERMINATE"
-    # canonical tdx requires 24.04 https://github.com/canonical/tdx
-    # full details around os: https://cloud.google.com/compute/docs/images/os-details
-    image_family=ubuntu-2404-lts-amd64
-  fi;
-
-  if gcloud compute instances list | grep -q "$instance_name"; then
-    echo "Instance $instance_name already exists"
-    return 1;
-  fi;
-
-  cmd="gcloud compute instances create $instance_name --zone $zone"
-  cmd="$cmd --machine-type $machine_type"
-  cmd="$cmd --image-family=$image_family"
-  cmd="$cmd --image-project=ubuntu-os-cloud"
-  cmd="$cmd --boot-disk-size=$disk_size"
-  cmd="$cmd --tags=http-server"
-  cmd="$cmd --restart-on-failure"
-  cmd="$cmd $extra_args"
-
-  if ! eval $cmd; then
-    echo "❌ Failed to create instance $instance_name"
-    return 1;
-  fi;
-
-  ssh_key=~/.ssh/arshan.pub;
-
-	gcloud compute instances add-metadata $instance_name \
-	  --zone=$zone \
-	  --metadata=ssh-keys="ritual:`cat $ssh_key`";
-}
-
-function vmserial() {
-  line=`gcloud compute instances list | fzf`
-  vm=`echo $line | awk '{print $1}'`
-  zone=`echo $line | awk '{print $2}'`
-  gcloud compute connect-to-serial-port $vm --zone=$zone
-}
-
-function vmaddserial() {
-  rm /tmp/gcp-machines.txt
-  gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
-  while IFS= read -r line; do
-    instance_name=`echo $line | awk '{print $1}'`
-    instance_zone=`echo $line | awk '{print $2}'`
-    gcloud compute instances add-metadata $instance_name --zone=$instance_zone --metadata serial-port-enable=1 &
-  done < /tmp/gcp-machines.txt
-}
-
-function copysetup() {
-  name=$1
-  if [ -z "$name" ]; then name="hello"; fi;
-  url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/profile_setup.sh"
-  echo "curl -fsSL $url | bash -s -- $name" | pbcopy
-}
-
-function vmdescribe() {
-  line=`gcloud compute instances list | fzf`
-  vm=`echo $line | awk '{print $1}'`
-  zone=`echo $line | awk '{print $2}'`
-  gcloud compute instances describe $vm --zone=$zone
-}
-
-# delete gcp firewalls
-function fwdelete() {
-  rm /tmp/gcp-firewalls.txt
-  gcloud compute firewall-rules list | fzf -m > /tmp/gcp-firewalls.txt
-  while IFS= read -r line; do
-    firewall_name=`echo $line | awk '{print $1}'`
-    echo "Deleting firewall $firewall_name"
-    gcloud compute firewall-rules delete $firewall_name -q 2>&1 > /dev/null &
-  done < /tmp/gcp-firewalls.txt
-}
-
-function fwallow() {
-  rm /tmp/gcp-machines.txt
-  gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
-  while IFS= read -r line; do
-    instance_name=`echo $line | awk '{print $1}'`
-    instance_zone=`echo $line | awk '{print $2}'`
-    echo "Allowing everything on instance $instance_name in zone $instance_zone"
-    gcloud compute instances add-tags $instance_name -q --zone=$instance_zone --tags=allow-everything 2>&1 > /dev/null &
-  done < /tmp/gcp-machines.txt
-}
-
-function removetags() {
-  rm /tmp/gcp-machines.txt
-  gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
-  while IFS= read -r line; do
-    instance_name=`echo $line | awk '{print $1}'`
-    instance_zone=`echo $line | awk '{print $2}'`
-    gcloud compute instances remove-tags $instance_name -q --zone=$instance_zone --tags $1 2>&1 > /dev/null &
-  done < /tmp/gcp-machines.txt
-}
-
-# delete gcp networks
-function nwdelete() {
-  rm /tmp/gcp-networks.txt
-  gcloud compute networks list | fzf -m > /tmp/gcp-networks.txt
-  while IFS= read -r line; do
-    network_name=`echo $line | awk '{print $1}'`
-    echo "Deleting network $network_name"
-    gcloud compute networks delete $network_name -q 2>&1 > /dev/null &
-  done < /tmp/gcp-networks.txt
-}
-
-# delete gcp subnetworks
-function snwdelete() {
-  rm /tmp/gcp-subnetworks.txt
-  gcloud compute networks subnets list | fzf -m > /tmp/gcp-subnetworks.txt
-  while IFS= read -r line; do
-    subnetwork_name=`echo $line | awk '{print $1}'`
-    region=`echo $line | awk '{print $2}'`
-    echo "Deleting subnetwork $subnetwork_name in region $region"
-    gcloud compute networks subnets delete $subnetwork_name --region=$region -q 2>&1 > /dev/null &
-  done < /tmp/gcp-subnetworks.txt
 }
