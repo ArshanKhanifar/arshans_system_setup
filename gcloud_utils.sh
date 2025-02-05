@@ -6,7 +6,7 @@ function vmdelete() {
     while read -r line; do
         name=`echo $line | awk '{print $1}'`
         zone=`echo $line | awk '{print $2}'`
-        gcloud compute instances delete $name --zone=$zone
+        gcloud compute instances delete $name --zone=$zone --quiet
     done < /tmp/gcp-machines.txt
     rm /tmp/gcp-machines.txt
 }
@@ -84,6 +84,12 @@ function vmcreate() {
             --boot-disk-type=pd-balanced \
             --boot-disk-device-name=$name
     fi
+
+    # Add SSH key to the instance
+    ssh_key=~/.ssh/arshan.pub
+    gcloud compute instances add-metadata $name \
+        --zone=$zone \
+        --metadata=ssh-keys="ritual:`cat $ssh_key`"
 }
 
 function vmserial() {
