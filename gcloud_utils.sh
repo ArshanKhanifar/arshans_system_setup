@@ -1,14 +1,15 @@
 #!/bin/bash
 
 function vmdelete() {
-    rm /tmp/gcp-machines.txt
+    rm -f /tmp/gcp-machines.txt 2>/dev/null || true
     gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
     while read -r line; do
         name=`echo $line | awk '{print $1}'`
         zone=`echo $line | awk '{print $2}'`
-        gcloud compute instances delete $name --zone=$zone --quiet
+        gcloud compute instances delete $name --zone=$zone --quiet &
     done < /tmp/gcp-machines.txt
-    rm /tmp/gcp-machines.txt
+    wait
+    rm -f /tmp/gcp-machines.txt
 }
 
 function parseVmArgs() {
@@ -143,13 +144,14 @@ function vmwait() {
 
 # delete gcp firewalls
 function fwdelete() {
-    rm /tmp/gcp-firewalls.txt
+    rm -f /tmp/gcp-firewalls.txt 2>/dev/null || true
     gcloud compute firewall-rules list | grep -i default | fzf -m > /tmp/gcp-firewalls.txt
     while read -r line; do
         name=`echo $line | awk '{print $1}'`
-        gcloud compute firewall-rules delete $name
+        gcloud compute firewall-rules delete $name --quiet &
     done < /tmp/gcp-firewalls.txt
-    rm /tmp/gcp-firewalls.txt
+    wait
+    rm -f /tmp/gcp-firewalls.txt 2>/dev/null || true
 }
 
 function fwallow() {
@@ -179,23 +181,24 @@ function removetags() {
 
 # delete gcp networks
 function nwdelete() {
-    rm /tmp/gcp-networks.txt
+    rm -f /tmp/gcp-networks.txt 2 >/dev/null || true
     gcloud compute networks list | grep -i default | fzf -m > /tmp/gcp-networks.txt
     while read -r line; do
         name=`echo $line | awk '{print $1}'`
-        gcloud compute networks delete $name
+        gcloud compute networks delete $name --quiet &
     done < /tmp/gcp-networks.txt
-    rm /tmp/gcp-networks.txt
+    wait
+    rm -f /tmp/gcp-networks.txt
 }
 
 # delete gcp subnetworks
 function snwdelete() {
-    rm /tmp/gcp-subnetworks.txt
+    rm /tmp/gcp-subnetworks.txt || true
     gcloud compute networks subnets list | grep -i default | fzf -m > /tmp/gcp-subnetworks.txt
     while read -r line; do
         name=`echo $line | awk '{print $1}'`
         region=`echo $line | awk '{print $2}'`
-        gcloud compute networks subnets delete $name --region=$region
+        gcloud compute networks subnets delete $name --region=$region --quiet
     done < /tmp/gcp-subnetworks.txt
     rm /tmp/gcp-subnetworks.txt
 }

@@ -6,6 +6,10 @@ else
     ARSH_RC_DIR="$( cd "$( dirname "${(%):-%N}" )" >/dev/null 2>&1 && pwd )"
 fi
 
+# for when zsh gets unruly: https://askubuntu.com/questions/441744/pressing-enter-produces-m-instead-of-a-newline
+# also this: https://www.reddit.com/r/zsh/comments/2rfcba/sometimes_the_enter_key_prints_m_instead_of_doing/
+stty sane
+
 source "$ARSH_RC_DIR/utilities.sh"
 source "$ARSH_RC_DIR/docker_utils.sh"
 source "$ARSH_RC_DIR/git_utils.sh"
