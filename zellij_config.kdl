@@ -20,10 +20,12 @@ themes {
 theme "catppuccin-mocha"
 
 // Default layout
-default_layout {
-    pane
-    pane size=1 borderless=true {
-        plugin location="zellij:status-bar"
+layout {
+    default {
+        pane
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
+        }
     }
 }
 
