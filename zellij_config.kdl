@@ -1,33 +1,27 @@
 // Zellij configuration file
 
+// Theme configuration
 themes {
     catppuccin-mocha {
-        bg "#1e1e2e"
         fg "#cdd6f4"
+        bg "#1e1e2e"
+        black "#181825"
         red "#f38ba8"
         green "#a6e3a1"
-        blue "#89b4fa"
         yellow "#f9e2af"
+        blue "#89b4fa"
         magenta "#cba6f7"
-        orange "#fab387"
         cyan "#89dceb"
-        black "#181825"
         white "#cdd6f4"
+        orange "#fab387"
     }
 }
 
 // Choose the theme
 theme "catppuccin-mocha"
 
-// Default layout
-layout {
-    default {
-        pane
-        pane size=1 borderless=true {
-            plugin location="zellij:status-bar"
-        }
-    }
-}
+// Default layout is "compact" - use a simple layout
+default_layout "compact"
 
 // Set Ctrl+Space as the prefix key (like your Byobu setup)
 keybinds clear-defaults=true {
