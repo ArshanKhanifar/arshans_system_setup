@@ -1,0 +1,105 @@
+// Zellij configuration file
+
+themes {
+    catppuccin-mocha {
+        bg "#1e1e2e"
+        fg "#cdd6f4"
+        red "#f38ba8"
+        green "#a6e3a1"
+        blue "#89b4fa"
+        yellow "#f9e2af"
+        magenta "#cba6f7"
+        orange "#fab387"
+        cyan "#89dceb"
+        black "#181825"
+        white "#cdd6f4"
+    }
+}
+
+// Choose the theme
+theme "catppuccin-mocha"
+
+// Default layout
+default_layout {
+    pane
+    pane size=1 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+}
+
+// Set Ctrl+Space as the prefix key (like your Byobu setup)
+keybinds clear-defaults=true {
+    normal {
+        // Unbind default keybindings
+        unbind "Ctrl g"
+        
+        // Set Ctrl+Space as prefix
+        bind "Ctrl Space" { SwitchToMode "tmux"; }
+        
+        // Smart pane navigation with Ctrl+hjkl (like your Byobu setup)
+        bind "Ctrl h" { MoveFocus "Left"; }
+        bind "Ctrl j" { MoveFocus "Down"; }
+        bind "Ctrl k" { MoveFocus "Up"; }
+        bind "Ctrl l" { MoveFocus "Right"; }
+    }
+    
+    // This is the "tmux" mode that activates when you press Ctrl+Space
+    tmux {
+        // Tab management
+        bind "c" { NewTab; SwitchToMode "normal"; }
+        bind "n" { GoToNextTab; SwitchToMode "normal"; }
+        bind "p" { GoToPreviousTab; SwitchToMode "normal"; }
+        
+        // Pane splits (like your Byobu setup)
+        bind "s" { NewPane "Down"; SwitchToMode "normal"; } // horizontal split
+        bind "v" { NewPane "Right"; SwitchToMode "normal"; } // vertical split
+        
+        // Copy mode
+        bind "[" { SwitchToMode "scroll"; }
+        
+        // Other useful bindings
+        bind "z" { TogglePaneFrames; SwitchToMode "normal"; }
+        bind "f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        
+        // Exit prefix mode with Escape or Enter
+        bind "Escape" { SwitchToMode "normal"; }
+        bind "Enter" { SwitchToMode "normal"; }
+    }
+    
+    // Scroll/copy mode (activated with prefix + [)
+    scroll {
+        bind "Escape" { SwitchToMode "normal"; }
+        bind "Enter" { SwitchToMode "normal"; }
+        bind "e" { EditScrollback; SwitchToMode "normal"; }
+        bind "s" { SwitchToMode "entersearch"; SearchInput 0; }
+        bind "Ctrl c" { ScrollToBottom; SwitchToMode "normal"; }
+        
+        // Vim-like navigation in copy mode
+        bind "j" { ScrollDown; }
+        bind "k" { ScrollUp; }
+        bind "d" { HalfPageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+        bind "f" { PageScrollDown; }
+        bind "b" { PageScrollUp; }
+        bind "g" { ScrollToTop; }
+        bind "G" { ScrollToBottom; }
+    }
+    
+    search {
+        bind "Escape" { ScrollToBottom; SwitchToMode "normal"; }
+        bind "Enter" { SwitchToMode "normal"; }
+    }
+    
+    entersearch {
+        bind "Escape" { SwitchToMode "scroll"; }
+        bind "Enter" { SwitchToMode "search"; }
+    }
+}
+
+// UI options
+ui {
+    pane_frames {
+        rounded_corners true
+        hide_session_name false
+    }
+}
