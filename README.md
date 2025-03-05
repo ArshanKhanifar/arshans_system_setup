@@ -33,6 +33,51 @@ url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/maste
 curl -fsSL $url | bash -s -- hello
 ```
 
+**Run with named arguments:**
+
+```
+url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/profile_setup.sh"
+curl -fsSL $url | bash -s -- --stage=<stage_name> --username=<username>
+```
+
+Available stages:
+- `all` - Run all stages (default)
+- `installPackages` - Install basic packages
+- `installUV` - Install uv package manager
+- `installZoxide` - Install zoxide directory jumper
+- `installBat` - Install bat (improved cat)
+- `installOhMyZsh` - Install Oh My Zsh
+- `installFoundry` - Install Foundry
+- `cloneRepo` - Clone the repository
+- `setupVim` - Set up Vim configuration
+- `setupByobu` - Set up Byobu terminal multiplexer
+- `installZellij` - Install Zellij terminal multiplexer
+- `configurePromptAndRcfiles` - Configure shell prompt and rc files
+- `interactiveCommands` - Run interactive commands
+
+Examples:
+
+```
+# Only install Zellij
+url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/profile_setup.sh"
+curl -fsSL $url | bash -s -- --stage=installZellij
+
+# Run all stages with a username
+url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/profile_setup.sh"
+curl -fsSL $url | bash -s -- --username=hello
+
+# Run a specific stage with a username
+url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/profile_setup.sh"
+curl -fsSL $url | bash -s -- --stage=setupVim --username=hello
+```
+
+**Note:** For backward compatibility, you can still use the first unnamed parameter as username:
+
+```
+url="https://raw.githubusercontent.com/ArshanKhanifar/arshans_system_setup/master/dist/profile_setup.sh"
+curl -fsSL $url | bash -s -- hello
+```
+
 **Note:** system script isn't really idempotent, if u wanna re-run it:
 
 ```
@@ -109,5 +154,22 @@ The configuration currently has the following stuff:
 * **next tab**: `prefix + n`
 * **previous tab**: `prefix + p`
 * **select between panes**: `ctrl + hkjl`
+
+### Zellij
+
+Zellij is a modern terminal multiplexer (alternative to tmux/byobu) with a more intuitive interface. It has been configured to use the same key bindings as Byobu for a consistent experience.
+
+#### Zellij Cheatsheet
+
+* `prefix` is `Ctrl Space` (same as Byobu)
+* **new tab**: `prefix + c`
+* **next tab**: `prefix + n`
+* **previous tab**: `prefix + p`
+* **horizontal split**: `prefix + s`
+* **vertical split**: `prefix + v`
+* **select between panes**: `Ctrl + hjkl` (same as Byobu)
+* **enter copy mode**: `prefix + [`
+* **toggle pane frames**: `prefix + z`
+* **toggle fullscreen**: `prefix + f`
 
 

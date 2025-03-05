@@ -114,7 +114,8 @@ function select_machine() {
 
 function sshh() {
   if ! eval "select_machine"; then echo "command was not successful"; return; fi
-  cmd="ssh -i $keyfile $hostname $additional_flags"
+  persistence_flags="-o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o ConnectTimeout=15 -o ConnectionAttempts=30 -o TCPKeepAlive=yes -o StrictHostKeyChecking=accept-new"
+  cmd="ssh -i $keyfile $persistence_flags $hostname $additional_flags"
   echo $cmd
   eval $cmd
 }
