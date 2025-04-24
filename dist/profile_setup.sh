@@ -236,55 +236,6 @@ function setupByobu() {
   echo "source ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.tmux
 }
 
-function installZellij() {
-  echo "Installing Zellij terminal multiplexer..."
-  
-  if [ "${machine}" = "${MACHINE_MAC}" ]; then
-    # Mac installation
-    if [ "${architecture}" = "${ARCHITECTURE_ARM64}" ]; then
-      # For Apple Silicon (M1/M2/etc)
-      brew install zellij
-    else
-      # For Intel Macs
-      brew install zellij
-    fi
-  elif [ "${machine}" = "${MACHINE_LINUX}" ]; then
-    # Linux installation
-    case "${ID}" in
-      ubuntu|debian)
-        # For Ubuntu/Debian
-        curl -L https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz | tar xz
-        sudo mv zellij /usr/local/bin/
-        ;;
-      alpine)
-        # For Alpine
-        apk add zellij
-        ;;
-      amzn)
-        # For Amazon Linux
-        curl -L https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz | tar xz
-        sudo mv zellij /usr/local/bin/
-        ;;
-      *)
-        echo "Unsupported Linux distribution for Zellij installation: ${ID}"
-        ;;
-    esac
-  else
-    echo "Unsupported OS for Zellij installation: ${machine}"
-  fi
-  
-  # Create symlink for Zellij configuration
-  symlinkConfig "$HOME/${REPO_NAME}/zellij_config.kdl" "$HOME/.config/zellij/config.kdl"
-  
-  # Add Zellij to shell configuration
-  echo "# Zellij terminal multiplexer" >> ~/$SHELL_RC_FILE
-  echo "alias zj='zellij'" >> ~/$SHELL_RC_FILE
-  echo "alias zja='zellij attach'" >> ~/$SHELL_RC_FILE
-  echo "alias zjls='zellij list-sessions'" >> ~/$SHELL_RC_FILE
-  
-  echo "Zellij installation completed!"
-}
-
 function configurePromptAndRcfiles() {
   # general.arshrc commands
   echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.zshrc
@@ -335,163 +286,47 @@ function installAwsCli() {
 }
 
 function updatePackageManager() {
-  if [ "${machine}" = "${MACHINE_MAC}" ]; then
-    # No need to update package manager on Mac, brew handles it
-    echo "Mac detected, skipping package manager update"
-  else
-    # Linux package manager update
-    case "${LINUX_INSTALLER}" in
-      apt-get)
-        sudo apt-get update
-        ;;
-      yum)
-        sudo yum update
-        ;;
-      apk)
-        sudo apk update
-        ;;
-      *)
-        echo "Unsupported package manager: ${LINUX_INSTALLER}"
-        return 1
-        ;;
-    esac
-  fi
+  case "${LINUX_INSTALLER}" in
+    apt-get)
+      sudo apt-get update
+      ;;
+    yum)
+      sudo yum update
+      ;;
+    apk)
+      sudo apk update
+      ;;
+    *)
+      echo "Unsupported package manager: ${LINUX_INSTALLER}"
+      exit 1
+      ;;
+  esac
 }
 
 function ensureJq() {
   if [ -z "`command -v jq`" ]; then
-    if [ "${machine}" = "${MACHINE_MAC}" ]; then
-      # Install jq using brew on Mac
-      brew install jq
-    else
-      # Use the LINUX_INSTALLER on Linux
-      eval "sudo ${LINUX_INSTALLER} install -y jq"
-    fi
+    # use the LINUX_INSTALLER to install
+    eval "sudo ${LINUX_INSTALLER} install -y jq"
   fi
 }
 
-# Function to create symlinks for configuration files
-function symlinkConfig() {
-  local source_file="$1"
-  local target_file="$2"
-  local target_dir=$(dirname "$target_file")
-  
-  # Create target directory if it doesn't exist
-  mkdir -p "$target_dir"
-  
-  # Check if the target file already exists
-  if [ -f "$target_file" ]; then
-    # Backup existing file if it's not a symlink
-    if [ ! -L "$target_file" ]; then
-      echo "Backing up existing config: $target_file to ${target_file}.bak"
-      mv "$target_file" "${target_file}.bak"
-    else
-      # Remove existing symlink
-      rm "$target_file"
-    fi
-  fi
-  
-  # Create a symbolic link
-  echo "Creating symlink: $source_file -> $target_file"
-  ln -s "$source_file" "$target_file"
-}
 
-
-
-function parse_args() {
-  # Default values
-  export STAGE="all"
-  export USERNAME=""
-
-  # Parse arguments
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --stage=*)
-        export STAGE="${1#*=}"
-        shift
-        ;;
-      --stage)
-        export STAGE="$2"
-        shift 2
-        ;;
-      --username=*)
-        export USERNAME="${1#*=}"
-        shift
-        ;;
-      --username)
-        export USERNAME="$2"
-        shift 2
-        ;;
-      *)
-        # For backward compatibility, assume first unnamed parameter is username
-        if [ -z "$USERNAME" ]; then
-          export USERNAME="$1"
-        fi
-        shift
-        ;;
-    esac
-  done
-
-  # Print parsed arguments
-  echo "Parsed arguments:"
-  echo "  Stage: $STAGE"
-  echo "  Username: $USERNAME"
-}
-
-function list_available_stages() {
-  echo "Available stages:"
-  echo "  all - Run all stages (default)"
-  echo "  installPackages - Install basic packages"
-  echo "  installUV - Install uv package manager"
-  echo "  installZoxide - Install zoxide directory jumper"
-  echo "  installBat - Install bat (improved cat)"
-  echo "  installOhMyZsh - Install Oh My Zsh"
-  echo "  installFoundry - Install Foundry"
-  echo "  cloneRepo - Clone the repository"
-  echo "  setupVim - Set up Vim configuration"
-  echo "  setupByobu - Set up Byobu terminal multiplexer"
-  echo "  installZellij - Install Zellij terminal multiplexer"
-  echo "  configurePromptAndRcfiles - Configure shell prompt and rc files"
-  echo "  interactiveCommands - Run interactive commands"
-}
 
 function main() {
-  # Parse arguments
-  parse_args "$@"
-
   # installing jq, needed for stage utils
   updatePackageManager
   ensureJq
-
-  # If a specific stage is provided, only run that stage
-  if [ -n "$STAGE" ] && [ "$STAGE" != "all" ]; then
-    echo "Running only the '$STAGE' stage..."
-    # Check if the function exists
-    if declare -f "$STAGE" > /dev/null; then
-      $STAGE
-      echo "Stage '$STAGE' completed."
-    else
-      echo "Error: Stage '$STAGE' not found!"
-      list_available_stages
-      return 1
-    fi
-  else
-    # Run all stages in the default order
-    echo "Running all stages..."
-    xst installPackages
-    xst installUV
-    xst installZoxide
-    xst installBat
-    xst installOhMyZsh
-    xst installFoundry
-    xst cloneRepo
-    xst setupVim
-    xst setupByobu
-    xst installZellij
-    xst configurePromptAndRcfiles $USERNAME
-    xst interactiveCommands
-  fi
+  xst installPackages
+  xst installUV
+  xst installZoxide
+  xst installBat
+  xst installOhMyZsh
+  xst installFoundry
+  xst cloneRepo
+  xst setupVim
+  xst setupByobu
+  xst configurePromptAndRcfiles $1
+  xst interactiveCommands
 }
 
-# Pass all arguments to main
-main "$@"
+main $1
