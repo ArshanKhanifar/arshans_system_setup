@@ -41,30 +41,38 @@ keybinds clear-defaults=true {
     
     // This is the "tmux" mode that activates when you press Ctrl+Space
     tmux {
+        // Show a help message when entering this mode
+        on_activate "Tmux mode: Use Alt+hjkl to resize panes. Press Esc to exit."
         // Tab management
-        bind "c" { NewTab; SwitchToMode "normal"; }
-        bind "n" { GoToNextTab; SwitchToMode "normal"; }
-        bind "p" { GoToPreviousTab; SwitchToMode "normal"; }
+        bind "c" { NewTab; SwitchToMode "normal"; }  // Pre+c: Create a new tab
+        bind "n" { GoToNextTab; SwitchToMode "normal"; }  // Pre+n: Go to next tab
+        bind "p" { GoToPreviousTab; SwitchToMode "normal"; }  // Pre+p: Go to previous tab
         
         // Pane splits (like your Byobu setup)
         bind "s" { NewPane "Down"; SwitchToMode "normal"; } // horizontal split
         bind "v" { NewPane "Right"; SwitchToMode "normal"; } // vertical split
         
+        // Resize panes with Alt+hjkl (like Byobu)
+        bind "Alt h" { Resize "Left"; }
+        bind "Alt j" { Resize "Down"; }
+        bind "Alt k" { Resize "Up"; }
+        bind "Alt l" { Resize "Right"; }
+        
         // Copy mode
-        bind "[" { SwitchToMode "scroll"; }
+        bind "[" { SwitchToMode "scroll"; }  // Prefix+[ enters scroll mode
         
         // Other useful bindings
         bind "z" { TogglePaneFrames; SwitchToMode "normal"; }
         bind "f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
         
         // Exit prefix mode with Escape or Enter
-        bind "Escape" { SwitchToMode "normal"; }
+        bind "Esc" { SwitchToMode "normal"; }
         bind "Enter" { SwitchToMode "normal"; }
     }
     
     // Scroll/copy mode (activated with prefix + [)
     scroll {
-        bind "Escape" { SwitchToMode "normal"; }
+        bind "Esc" { SwitchToMode "normal"; }
         bind "Enter" { SwitchToMode "normal"; }
         bind "e" { EditScrollback; SwitchToMode "normal"; }
         bind "s" { SwitchToMode "entersearch"; SearchInput 0; }
@@ -82,14 +90,16 @@ keybinds clear-defaults=true {
     }
     
     search {
-        bind "Escape" { ScrollToBottom; SwitchToMode "normal"; }
+        bind "Esc" { ScrollToBottom; SwitchToMode "normal"; }
         bind "Enter" { SwitchToMode "normal"; }
     }
     
     entersearch {
-        bind "Escape" { SwitchToMode "scroll"; }
+        bind "Esc" { SwitchToMode "scroll"; }
         bind "Enter" { SwitchToMode "search"; }
     }
+    
+
 }
 
 // UI options

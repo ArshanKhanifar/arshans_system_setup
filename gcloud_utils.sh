@@ -12,7 +12,19 @@ function vmdelete() {
     rm -f /tmp/gcp-machines.txt
 }
 
-function parseVmArgs() {
+# This function has been removed and its functionality integrated into vmcreate
+
+# usage: vmcreate --tdx --name <n> [--zone <zone>] [--machine-type <type>] [--boot-disk-size <size>] [--image <image>] [--image-project <project>]
+function vmcreate() {
+    # Parse arguments directly in vmcreate
+    name=""
+    tdx=""
+    zone=""
+    machine_type=""
+    boot_disk_size=""
+    image=""
+    image_project=""
+    
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --name)
@@ -30,16 +42,24 @@ function parseVmArgs() {
                 machine_type=$2
                 shift
                 ;;
+            --boot-disk-size)
+                boot_disk_size=$2
+                shift
+                ;;
+            --image)
+                image=$2
+                shift
+                ;;
+            --image-project)
+                image_project=$2
+                shift
+                ;;
             *)
                 shift
                 ;;
         esac
+        shift
     done
-}
-
-# usage: vmcreate --tdx --name <n>
-function vmcreate() {
-    parseVmArgs "$@"
 
     if [ -z "$name" ]; then
         echo "name is required"
@@ -57,6 +77,18 @@ function vmcreate() {
             machine_type="e2-standard-4"
         fi
     fi
+    
+    if [ -z "$boot_disk_size" ]; then
+        boot_disk_size="200GB"
+    fi
+    
+    if [ -z "$image" ]; then
+        image="ubuntu-2204-jammy-v20230919"
+    fi
+    
+    if [ -z "$image_project" ]; then
+        image_project="ubuntu-os-cloud"
+    fi
 
     if [ -n "$tdx" ]; then
         gcloud compute instances create $name \
@@ -64,9 +96,9 @@ function vmcreate() {
             --machine-type=$machine_type \
             --confidential-compute \
             --maintenance-policy=TERMINATE \
-            --image=ubuntu-2204-jammy-v20230919 \
-            --image-project=ubuntu-os-cloud \
-            --boot-disk-size=200GB \
+            --image=$image \
+            --image-project=$image_project \
+            --boot-disk-size=$boot_disk_size \
             --boot-disk-type=pd-balanced \
             --boot-disk-device-name=$name \
             --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
@@ -79,9 +111,9 @@ function vmcreate() {
         gcloud compute instances create $name \
             --zone=$zone \
             --machine-type=$machine_type \
-            --image=ubuntu-2204-jammy-v20230919 \
-            --image-project=ubuntu-os-cloud \
-            --boot-disk-size=200GB \
+            --image=$image \
+            --image-project=$image_project \
+            --boot-disk-size=$boot_disk_size \
             --boot-disk-type=pd-balanced \
             --boot-disk-device-name=$name
     fi

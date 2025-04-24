@@ -273,11 +273,8 @@ function installZellij() {
     echo "Unsupported OS for Zellij installation: ${machine}"
   fi
   
-  # Create config directory if it doesn't exist
-  mkdir -p ~/.config/zellij
-  
-  # Copy the Zellij configuration file
-  cp ~/${REPO_NAME}/zellij_config.kdl ~/.config/zellij/config.kdl
+  # Create symlink for Zellij configuration
+  symlinkConfig "$HOME/${REPO_NAME}/zellij_config.kdl" "$HOME/.config/zellij/config.kdl"
   
   # Add Zellij to shell configuration
   echo "# Zellij terminal multiplexer" >> ~/$SHELL_RC_FILE
@@ -373,6 +370,32 @@ function ensureJq() {
   fi
 }
 
+# Function to create symlinks for configuration files
+function symlinkConfig() {
+  local source_file="$1"
+  local target_file="$2"
+  local target_dir=$(dirname "$target_file")
+  
+  # Create target directory if it doesn't exist
+  mkdir -p "$target_dir"
+  
+  # Check if the target file already exists
+  if [ -f "$target_file" ]; then
+    # Backup existing file if it's not a symlink
+    if [ ! -L "$target_file" ]; then
+      echo "Backing up existing config: $target_file to ${target_file}.bak"
+      mv "$target_file" "${target_file}.bak"
+    else
+      # Remove existing symlink
+      rm "$target_file"
+    fi
+  fi
+  
+  # Create a symbolic link
+  echo "Creating symlink: $source_file -> $target_file"
+  ln -s "$source_file" "$target_file"
+}
+
 
 
 function parse_args() {
@@ -445,7 +468,7 @@ function main() {
     echo "Running only the '$STAGE' stage..."
     # Check if the function exists
     if declare -f "$STAGE" > /dev/null; then
-      xst $STAGE
+      $STAGE
       echo "Stage '$STAGE' completed."
     else
       echo "Error: Stage '$STAGE' not found!"
