@@ -14,7 +14,7 @@ function vmdelete() {
 
 # This function has been removed and its functionality integrated into vmcreate
 
-# usage: vmcreate --tdx --name <n> [--zone <zone>] [--machine-type <type>] [--boot-disk-size <size>] [--image <image>] [--image-project <project>]
+# usage: vmcreate --tdx --name <n> [--zone <zone>] [--machine-type <type>] [--boot-disk-size <size>] [--image <image>] [--image-project <project>] [--port-range <start>-<end>]
 function vmcreate() {
     # Parse arguments directly in vmcreate
     name=""
@@ -24,6 +24,7 @@ function vmcreate() {
     boot_disk_size=""
     image=""
     image_project=""
+    port_range="3000-10000"
     
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -52,6 +53,10 @@ function vmcreate() {
                 ;;
             --image-project)
                 image_project=$2
+                shift
+                ;;
+            --port-range)
+                port_range=$2
                 shift
                 ;;
             *)
@@ -106,6 +111,7 @@ function vmcreate() {
             --shielded-vtpm \
             --shielded-integrity-monitoring \
             --labels=goog-ec-src=vm_add-gcloud \
+            --tags=$name \
             --reservation-affinity=any
     else
         gcloud compute instances create $name \
@@ -115,7 +121,8 @@ function vmcreate() {
             --image-project=$image_project \
             --boot-disk-size=$boot_disk_size \
             --boot-disk-type=pd-balanced \
-            --boot-disk-device-name=$name
+            --boot-disk-device-name=$name \
+            --tags=$name
     fi
 
     # Add SSH key to the instance
@@ -123,6 +130,20 @@ function vmcreate() {
     gcloud compute instances add-metadata $name \
         --zone=$zone \
         --metadata=ssh-keys="ritual:`cat $ssh_key`"
+    
+    # Extract port range values
+    start_port=$(echo $port_range | cut -d'-' -f1)
+    end_port=$(echo $port_range | cut -d'-' -f2)
+    
+    # Create firewall rule to open the specified port range
+    gcloud compute firewall-rules create default-allow-$name-ports \
+        --direction=INGRESS \
+        --priority=1000 \
+        --network=default \
+        --action=ALLOW \
+        --rules=tcp:$start_port-$end_port \
+        --source-ranges=0.0.0.0/0 \
+        --target-tags=$name
 }
 
 function vmserial() {
