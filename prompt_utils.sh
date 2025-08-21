@@ -11,7 +11,6 @@ function copyprompt() {
     fi
 
     echo "$files" | while read -r file; do
-        echo "Copying $file"
         cat "$prompt_dir/$file"
         echo -e "\n"
     done | pbcopy

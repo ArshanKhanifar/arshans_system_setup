@@ -305,3 +305,21 @@ function add_gcp_vms_to_machine_file() {
   cat /tmp/machines | awk '{print $1 " ~/.ssh/arshan ritual@" $5}' >> $MACHINE_FILEPATH
   rm /tmp/machines
 }
+
+awsdelete() {
+    rm -f /tmp/aws-machines.txt 2> /dev/null || true
+    aws ec2 describe-instances \
+        --filters "Name=instance-state-name,Values=running" \
+        --query "Reservations[*].Instances[*].[InstanceId,Tags[?Key=='Name'].Value|[0],Placement.AvailabilityZone]" \
+        --output text | \
+        awk '{print $1 "\t" ($2 == "None" ? $1 : $2) "\t" $3}' | \
+        fzf -m > /tmp/aws-machines.txt
+
+    while read -r line; do
+        instance_id=$(echo "$line" | awk '{print $1}')
+        aws ec2 terminate-instances --instance-ids "$instance_id" &
+    done < /tmp/aws-machines.txt
+
+    wait
+    rm -f /tmp/aws-machines.txt
+}
