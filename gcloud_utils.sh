@@ -12,6 +12,18 @@ function vmdelete() {
     rm -f /tmp/gcp-machines.txt
 }
 
+function vmreset() {
+    rm -f /tmp/gcp-machines.txt 2>/dev/null || true
+    gcloud compute instances list | grep -i running | fzf -m > /tmp/gcp-machines.txt
+    while read -r line; do
+        name=`echo $line | awk '{print $1}'`
+        zone=`echo $line | awk '{print $2}'`
+        gcloud compute instances reset $name --zone=$zone --quiet &
+    done < /tmp/gcp-machines.txt
+    wait
+    rm -f /tmp/gcp-machines.txt
+}
+
 # This function has been removed and its functionality integrated into vmcreate
 
 # usage: vmcreate --tdx --name <n> [--zone <zone>] [--machine-type <type>] [--boot-disk-size <size>] [--image <image>] [--image-project <project>] [--port-range <start>-<end>]
