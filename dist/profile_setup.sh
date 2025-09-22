@@ -245,11 +245,11 @@ function configurePromptAndRcfiles() {
   emoji="${emojis[RANDOM % ${#emojis[@]}]}"
   machine_title="$emoji-$1"
 
-  # For unix-like systems, change the shell to zsh
+  # For unix-like systems, configure zsh prompt (without changing default shell)
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
     # NOTE: aws linux doesn't have this
     # https://stackoverflow.com/questions/17126051/how-to-change-shell-on-amazon-ec2-linux-instance
-    sudo chsh -s /bin/zsh `whoami`;
+    # Removed: sudo chsh -s /bin/zsh `whoami`; # User doesn't want ZSH as default shell
     sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="zhann"/' ~/.zshrc;
     preprompt='PROMPT="%(?:%{$fg_bold[green]%}%1{'
     postprompt='%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} "'
@@ -266,7 +266,7 @@ function interactiveCommands() {
     exit 0
   fi
 
-  chsh -s $(which zsh)
+  # Removed: chsh -s $(which zsh) # User doesn't want ZSH as default shell
 
   if [ "${machine}" = "${MACHINE_MAC}" ] &&
      [ "${architecture}" != "${ARCHITECTURE_ARM64}" ]; then
