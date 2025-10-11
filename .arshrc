@@ -10,6 +10,11 @@ fi
 # also this: https://www.reddit.com/r/zsh/comments/2rfcba/sometimes_the_enter_key_prints_m_instead_of_doing/
 stty sane
 
+# Start SSH agent if not already running
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  eval "$(ssh-agent -s)" > /dev/null
+fi
+
 source "$ARSH_RC_DIR/utilities.sh"
 source "$ARSH_RC_DIR/docker_utils.sh"
 source "$ARSH_RC_DIR/git_utils.sh"
