@@ -23,8 +23,8 @@ function installToolkit() {
     # https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=22.04&target_type=deb_network
     wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
     sudo dpkg -i cuda-keyring_1.1-1_all.deb
-    sudo apt-get update
-    sudo apt-get -y install cuda-toolkit-12-5
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get -y install cuda-toolkit-12-5
 
     cuda_path='export PATH=$PATH:/usr/local/cuda-12.5/bin/';
     echo $cuda_path >> ~/.zshrc
@@ -33,34 +33,34 @@ function installToolkit() {
 
 function installNvidiaDriversAndPurge() {
   sudo apt-mark unhold "cuda*" "libnvidia*" "nvidia*"
-  sudo apt purge '^nvidia-.*' -y
-  sudo apt purge '^libnvidia-.*' -y
-  sudo apt purge '^xserver-xorg-video-nvidia-.*' -y
-  sudo apt autoremove -y
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt purge '^nvidia-.*' -y
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt purge '^libnvidia-.*' -y
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt purge '^xserver-xorg-video-nvidia-.*' -y
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt autoremove -y
 
-  sudo apt -y install aptitude
-  sudo aptitude install -y  libnvidia-common-555
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt -y install aptitude
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 aptitude install -y  libnvidia-common-555
 
-  sudo apt-get update
-  sudo apt-get install -y libnvidia-common-555
-  sudo apt-get install -y nvidia-driver-555-open
-  sudo apt-get install -y cuda-drivers-555
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y libnvidia-common-555
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y nvidia-driver-555-open
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y cuda-drivers-555
 }
 
 function installNvidiaDrivers() {
     # this requires a reboot I think
-    sudo apt-get update
-    sudo apt-get install -y libnvidia-common-555
-    sudo apt-get install -y nvidia-driver-555-open
-    sudo apt-get install -y cuda-drivers-555
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y libnvidia-common-555
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y nvidia-driver-555-open
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y cuda-drivers-555
 }
 
 function installNvidiaDriversLatest() {
     # this requires a reboot I think
-    sudo apt-get update
-    sudo apt-get install -y libnvidia-common-560
-    sudo apt-get install -y nvidia-driver-560-open
-    sudo apt-get install -y cuda-drivers-560
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y libnvidia-common-560
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y nvidia-driver-560-open
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y cuda-drivers-560
 }
 
 function installDrivers() {
@@ -106,12 +106,12 @@ function setUp() {
   && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
       sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
       sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-  sudo apt-get update
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
 }
 
 function install() {
   set -e
-  sudo apt-get install -y nvidia-container-toolkit git-lfs jq
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y nvidia-container-toolkit git-lfs jq
   sudo systemctl restart docker
 }
 
@@ -138,7 +138,7 @@ function main() {
   set -e
   # installing jq, needed for stage utils
   if [ -z "`command -v jq`" ]; then
-    sudo apt-get install -y jq
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y jq
   fi
 
   if command -v docker > /dev/null \

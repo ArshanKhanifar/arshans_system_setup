@@ -90,7 +90,7 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
       LINUX_INSTALLER="apt-get"
       ;;
     debian)
-      apt-get update
+      DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
       LINUX_INSTALLER="apt-get"
       ;;
     alpine)
@@ -108,8 +108,10 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
 fi
 
 function installPackages() {
-  # for some packages that require user input
-  DEBIAN_FRONTEND=noninteractive
+  # for some packages that require user input - make fully non-interactive
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
   echo "Using installer: $LINUX_INSTALLER"
 
   # install packages
@@ -117,13 +119,13 @@ function installPackages() {
     # all linux machines
     if [ "${ENVIRONMENT}" = "docker" ]; then
       # docker machines
-      eval "${LINUX_INSTALLER} install -y git zsh vim byobu make jq"
+      eval "DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y git zsh vim byobu make jq"
     else
       # skip restart prompt
       if [ -f "/etc/needrestart/needrestart.conf" ]; then
         grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
       fi
-      eval "sudo ${LINUX_INSTALLER} install -y git zsh vim byobu make jq silversearcher-ag"
+      eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y git zsh vim byobu make jq silversearcher-ag"
     fi
   else
     # install homebrew
@@ -135,6 +137,8 @@ function installPackages() {
   fi
 
   unset DEBIAN_FRONTEND
+  unset NEEDRESTART_MODE
+  unset NEEDRESTART_SUSPEND
 }
 
 function installUV() {
@@ -160,7 +164,7 @@ function installBat() {
         echo "skipping installation for Amazon Linux"
         return 0
     fi
-    eval "sudo ${LINUX_INSTALLER} install -y bat"
+    eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y bat"
   fi
 }
 
@@ -282,16 +286,20 @@ function interactiveCommands() {
 }
 
 function installAwsCli() {
-  sudo apt install awscli -y
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt install awscli -y
 }
 
 function updatePackageManager() {
+  export DEBIAN_FRONTEND=noninteractive
+  export NEEDRESTART_MODE=a
+  export NEEDRESTART_SUSPEND=1
+  
   case "${LINUX_INSTALLER}" in
     apt-get)
-      sudo apt-get update
+      sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
       ;;
     yum)
-      sudo yum update
+      sudo yum update -y
       ;;
     apk)
       sudo apk update
@@ -301,12 +309,16 @@ function updatePackageManager() {
       exit 1
       ;;
   esac
+  
+  unset DEBIAN_FRONTEND
+  unset NEEDRESTART_MODE
+  unset NEEDRESTART_SUSPEND
 }
 
 function ensureJq() {
   if [ -z "`command -v jq`" ]; then
-    # use the LINUX_INSTALLER to install
-    eval "sudo ${LINUX_INSTALLER} install -y jq"
+    # use the LINUX_INSTALLER to install - make fully non-interactive
+    eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y jq"
   fi
 }
 

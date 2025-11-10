@@ -12,16 +12,16 @@ function install() {
   if ! [ "$runtime" = "docker" ] && [ -f "/etc/needrestart/needrestart.conf" ]; then
     grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf;
   fi
-  sudo apt-get update && sudo apt-get install -y software-properties-common
-  sudo add-apt-repository -y ppa:deadsnakes/ppa
-  sudo apt-get update
-  sudo apt install -y python3.11
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y && sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y software-properties-common
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 add-apt-repository -y ppa:deadsnakes/ppa
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt install -y python3.11
 }
 
 function main() {
   # installing jq, needed for stage utils
   if [ -z "`command -v jq`" ]; then
-    sudo apt-get install -y jq
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get install -y jq
   fi
   set -e
   xst install
