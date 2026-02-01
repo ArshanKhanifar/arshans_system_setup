@@ -158,6 +158,82 @@ function vmcreate() {
         --target-tags=$name
 }
 
+# usage: vmcreateandsetup --name <n> [--tdx] [--zone <zone>] [--machine-type <type>] [--boot-disk-size <size>] [--image <image>] [--image-project <project>] [--port-range <start>-<end>]
+# Creates a VM using vmcreate and sets up SSH key and config for GitHub
+function vmcreateandsetup() {
+    # First, call vmcreate with all arguments
+    vmcreate "$@"
+    
+    # Extract name and zone from arguments to use for setup
+    name=""
+    zone=""
+    
+    # Parse arguments to get name and zone
+    args=("$@")
+    i=0
+    while [[ $i -lt ${#args[@]} ]]; do
+        case "${args[$i]}" in
+            --name)
+                name="${args[$i+1]}"
+                ((i++))
+                ;;
+            --zone)
+                zone="${args[$i+1]}"
+                ((i++))
+                ;;
+        esac
+        ((i++))
+    done
+    
+    if [ -z "$name" ]; then
+        echo "name is required"
+        return 1
+    fi
+    
+    if [ -z "$zone" ]; then
+        zone="us-central1-a"
+    fi
+    
+    # Wait for VM to be ready
+    echo "Waiting for VM to become available..."
+    while true; do
+        if gcloud compute ssh ritual@$name --zone=$zone --command="echo 'VM is ready'" 2>/dev/null; then
+            break
+        fi
+        echo "VM not yet available, retrying in 5 seconds..."
+        sleep 5
+    done
+    
+    # Get the private key path
+    private_key=~/.ssh/arshan
+    
+    if [ ! -f "$private_key" ]; then
+        echo "Error: Private key $private_key not found"
+        return 1
+    fi
+    
+    # Ensure .ssh directory exists and copy private key to VM's .ssh directory
+    echo "Copying SSH private key to VM..."
+    gcloud compute ssh ritual@$name --zone=$zone --command="mkdir -p ~/.ssh" 2>/dev/null
+    gcloud compute scp --zone=$zone $private_key ritual@$name:~/.ssh/arshan
+    
+    # Set correct permissions on the private key
+    gcloud compute ssh ritual@$name --zone=$zone --command="chmod 600 ~/.ssh/arshan"
+    
+    # Create ssh/config with GitHub host configuration
+    echo "Creating SSH config for GitHub..."
+    gcloud compute ssh ritual@$name --zone=$zone --command="cat > ~/.ssh/config << 'EOF'
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/arshan
+    IdentitiesOnly yes
+EOF
+chmod 600 ~/.ssh/config"
+    
+    echo "VM setup complete! SSH key and config have been configured."
+}
+
 function vmserial() {
     if ! eval "select_machine"; then
         echo "command was not successful"

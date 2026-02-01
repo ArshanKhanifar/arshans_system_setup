@@ -2,7 +2,7 @@
 
 function copyprompt() {
     prompt_pattern=$1
-    prompt_dir=~/.prompts
+    prompt_dir=~/repos/arshan-agent-sessions/prompts
     
     if [ -z "$prompt_pattern" ]; then
         files=`ls $prompt_dir/ | fzf -m`

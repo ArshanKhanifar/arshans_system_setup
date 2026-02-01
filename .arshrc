@@ -179,3 +179,73 @@ function gethpeers() {
 function curlbn() {
   curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' $1
 }
+
+# Generate documentation directory path and copy to clipboard
+function docdir() {
+  local base_path="~/repos/arshan-agent-sessions/sessions"
+  local preamble_file="$HOME/repos/arshan-agent-sessions/prompts/preamble.md"
+  local project="$1"
+  local model=""
+  local dated=false
+  
+  # Check if preamble file exists
+  if [ ! -f "$preamble_file" ]; then
+    echo "Error: Preamble file not found at $preamble_file"
+    return 1
+  fi
+  
+  # Check if project is provided
+  if [ -z "$project" ]; then
+    echo "Error: Project name is required"
+    return 1
+  fi
+  
+  # Parse arguments
+  shift
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --dated)
+        dated=true
+        shift
+        ;;
+      *)
+        model="$1"
+        shift
+        ;;
+    esac
+  done
+  
+  # Build the path
+  local path="$base_path/$project"
+  
+  # Add date and/or model suffix
+  if [ "$dated" = true ] || [ -n "$model" ]; then
+    path="$path/"
+    
+    if [ "$dated" = true ]; then
+      # Get current date in format: nov-20
+      local date_str=$(/bin/date +"%b-%d" | /usr/bin/tr '[:upper:]' '[:lower:]')
+      path="${path}${date_str}"
+      
+      if [ -n "$model" ]; then
+        path="${path}-${model}"
+      fi
+    else
+      path="${path}${model}"
+    fi
+  fi
+  
+  # Read preamble content (use /bin/cat to avoid bat alias)
+  local preamble=$(/bin/cat "$preamble_file")
+  
+  # Create the message with preamble
+  local message="$preamble
+
+For the entirety of this conversation put all of the documentation under the $path directory (where ~ refers to the home directory)."
+  
+  # Copy to clipboard
+  echo -n "$message" | /usr/bin/pbcopy
+  
+  # Print confirmation
+  echo "✅ Copied to clipboard: $message"
+}
