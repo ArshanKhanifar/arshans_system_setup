@@ -76,7 +76,7 @@ Running `profile_setup.sh` (all stages) installs and configures:
 - Byobu/tmux keybindings from `keybindings.tmux`
 - Zellij config at `~/.config/zellij/config.kdl`
 - iTerm2 dynamic profile + keymap preset (macOS only)
-- Shell rc: sources `.arshrc`, `bash_prompt.sh`, zoxide init, `$HOME/.local/bin` on PATH
+- Shell rc (always applied on every run, idempotent): `.bash_profile` sources `.bashrc`; `.bashrc`/`.zshrc` get `.arshrc`, `bash_prompt.sh`, fzf, zoxide init, Foundry on PATH, and `$HOME/.local/bin`
 
 **Optional / interactive stage**
 - ctags + silver searcher aliases (macOS, when `INTERACTIVE=true`)

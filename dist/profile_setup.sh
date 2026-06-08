@@ -215,6 +215,7 @@ function installPackages() {
     ensure_brew_package make
     ensure_brew_package jq
     ensure_brew_package the_silver_searcher
+    ensure_brew_package gnu-sed
   fi
 
   unset DEBIAN_FRONTEND
@@ -260,10 +261,6 @@ function installZoxide() {
   if ! command -v zoxide >/dev/null 2>&1; then
     curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
   fi
-  ensure_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
-  ensure_line "$HOME/.zshrc" 'export PATH="$HOME/.local/bin:$PATH"'
-  ensure_line "$HOME/.bashrc" 'eval "$(zoxide init bash)"'
-  ensure_line "$HOME/.zshrc" 'eval "$(zoxide init zsh)"'
 }
 
 function installOhMyZsh() {
@@ -333,7 +330,6 @@ function setupZellij() {
     mv "${target_config}.tmp" "$target_config"
   fi
 
-  ensure_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
 }
 
 function cloneRepo() {
@@ -424,11 +420,30 @@ Finish setup in iTerm2:
 EOF
 }
 
-function configurePromptAndRcfiles() {
+function ensureShellRcfiles() {
+  ensure_line "$HOME/.bash_profile" '# Load interactive settings for login shells (Terminal, SSH, etc.)'
+  ensure_line "$HOME/.bash_profile" 'if [ -f "$HOME/.bashrc" ]; then'
+  ensure_line "$HOME/.bash_profile" '  . "$HOME/.bashrc"'
+  ensure_line "$HOME/.bash_profile" 'fi'
+
   ensure_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
   ensure_line "$HOME/.bashrc" "source ~/${REPO_NAME}/${RCFILE}"
   ensure_line "$HOME/.bashrc" "source ~/${REPO_NAME}/${BASH_PROMPT}"
+  ensure_line "$HOME/.bashrc" '# Keep uv-managed Python ahead of Homebrew after .arshrc loads brew shellenv'
+  ensure_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
+  ensure_line "$HOME/.bashrc" '[ -f ~/.fzf.bash ] && source ~/.fzf.bash'
+  ensure_line "$HOME/.bashrc" 'eval "$(zoxide init bash)"'
+  ensure_line "$HOME/.bashrc" 'export PATH="$PATH:$HOME/.foundry/bin"'
+
+  ensure_line "$HOME/.zshrc" 'export PATH="$HOME/.local/bin:$PATH"'
   ensure_line "$HOME/.zshrc" "source ~/${REPO_NAME}/${RCFILE}"
+  ensure_line "$HOME/.zshrc" '[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh'
+  ensure_line "$HOME/.zshrc" 'eval "$(zoxide init zsh)"'
+  ensure_line "$HOME/.zshrc" 'export PATH="$PATH:$HOME/.foundry/bin"'
+}
+
+function configurePromptAndRcfiles() {
+  ensureShellRcfiles
 
   emojis=(🐳 🐸 🙈 🐶 🐥 🐝 🐞 🪲)
   emoji="${emojis[RANDOM % ${#emojis[@]}]}"
@@ -524,6 +539,9 @@ function main() {
   runStage setupITerm setupITerm
   runStage configurePromptAndRcfiles configurePromptAndRcfiles
   runStage interactiveCommands interactiveCommands
+
+  # Always re-apply shell rc lines so reruns repair .bashrc/.zshrc after oh-my-zsh, etc.
+  ensureShellRcfiles
 }
 
 main "$@"
