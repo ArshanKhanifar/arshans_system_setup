@@ -51,9 +51,42 @@ Available stages:
 - `cloneRepo` - Clone the repository
 - `setupVim` - Set up Vim configuration
 - `setupByobu` - Set up Byobu terminal multiplexer
-- `installZellij` - Install Zellij terminal multiplexer
+- `installZellij` - Install Zellij terminal multiplexer and config
+- `setupITerm` - Install iTerm2 profile and key bindings (macOS only)
 - `configurePromptAndRcfiles` - Configure shell prompt and rc files
 - `interactiveCommands` - Run interactive commands
+
+## What gets installed on a new machine
+
+Running `profile_setup.sh` (all stages) installs and configures:
+
+**Package managers / CLI tools**
+- git, zsh, vim, byobu, make, jq, silver searcher (`ag` / `the_silver_searcher`)
+- Homebrew (macOS only, if missing)
+- uv (Python package manager)
+- zoxide (smart cd)
+- bat (better cat; macOS via Homebrew, Linux via apt where supported)
+- oh-my-zsh
+- Foundry (forge/cast/anvil)
+- zellij (terminal multiplexer)
+
+**Dotfiles / config**
+- Clones `arshans_system_setup` into `$HOME`
+- Vim: Vundle + vim-plug plugins, `.vimrc`, IdeaVim config
+- Byobu/tmux keybindings from `keybindings.tmux`
+- Zellij config at `~/.config/zellij/config.kdl`
+- iTerm2 dynamic profile + keymap preset (macOS only)
+- Shell rc: sources `.arshrc`, `bash_prompt.sh`, zoxide init, `$HOME/.local/bin` on PATH
+
+**Optional / interactive stage**
+- ctags + silver searcher aliases (macOS, when `INTERACTIVE=true`)
+
+**Vim plugins installed**
+- Vundle: vim-tmux-navigator, dracula theme
+- vim-plug: fzf, fzf.vim
+
+**Not changed**
+- Default login shell is not switched to zsh (bash remains default if already set)
 
 Examples:
 
