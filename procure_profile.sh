@@ -2,33 +2,28 @@
 
 source ./procure_utils.sh
 
-# fail early
+progress_file="${progress_file:-profile_setup.json}"
+
 set -e
-
-if ! which sudo 2>&1 > /dev/null; then
-  sudo() { "$@"; }
-  echo "sudo command not found, using direct execution."
-fi
-
 
 USER_NAME="arshankhanifar"
 REPO_NAME="arshans_system_setup"
 RCFILE=".arshrc"
+BASH_PROMPT="bash_prompt.sh"
 NOPLUGINS_VIMRC="no_plugins.vim"
 JETBRAINS_VIMRC="arshan_jetbrains.ideavimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
 CUSTOM_VIM="custom.vim"
 PLUG_PLUGINS="plug.vim"
 BYOBU_KEYBINDINGS="keybindings.tmux"
+ZELLIJ_CONFIG="zellij_config.kdl"
 SHELL_RC_FILE=".zshrc"
 
 MACHINE_MAC="Mac"
 MACHINE_LINUX="Linux"
-
 ARCHITECTURE_ARM64="arm64"
 
 architecture="$(uname -m)"
-
 unameOut="$(uname -s)"
 
 case "${unameOut}" in
@@ -63,33 +58,71 @@ if [ "${machine}" = "${MACHINE_LINUX}" ]; then
   esac
 fi
 
+function parseArgs() {
+  STAGE="all"
+  USER_LABEL="$(whoami)"
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --stage=*)
+        STAGE="${1#*=}"
+        ;;
+      --stage)
+        STAGE="$2"
+        shift
+        ;;
+      --username=*)
+        USER_LABEL="${1#*=}"
+        ;;
+      --username)
+        USER_LABEL="$2"
+        shift
+        ;;
+      *)
+        USER_LABEL="$1"
+        ;;
+    esac
+    shift
+  done
+}
+
+function shouldRunStage() {
+  local stage_name="$1"
+  [ "$STAGE" = "all" ] || [ "$STAGE" = "$stage_name" ]
+}
+
+function runStage() {
+  local stage_name="$1"
+  shift
+  if shouldRunStage "$stage_name"; then
+    xst "$@"
+  fi
+}
+
 function installPackages() {
-  # for some packages that require user input - make fully non-interactive
   export DEBIAN_FRONTEND=noninteractive
   export NEEDRESTART_MODE=a
   export NEEDRESTART_SUSPEND=1
-  echo "Using installer: $LINUX_INSTALLER"
 
-  # install packages
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
-    # all linux machines
+    echo "Using installer: $LINUX_INSTALLER"
     if [ "${ENVIRONMENT}" = "docker" ]; then
-      # docker machines
       eval "DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y git zsh vim byobu make jq"
     else
-      # skip restart prompt
       if [ -f "/etc/needrestart/needrestart.conf" ]; then
         grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
       fi
       eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y git zsh vim byobu make jq silversearcher-ag"
     fi
   else
-    # install homebrew
-    if ! which brew 2>&1 > /dev/null; then
-      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    fi
-    # Mac environment
-    brew install git zsh vim byobu make jq the_silver_searcher
+    ensure_homebrew
+    ensure_brew_package git
+    ensure_brew_package zsh
+    ensure_brew_package vim
+    ensure_brew_package byobu
+    ensure_brew_package make
+    ensure_brew_package jq
+    ensure_brew_package the_silver_searcher
   fi
 
   unset DEBIAN_FRONTEND
@@ -98,146 +131,239 @@ function installPackages() {
 }
 
 function installUV() {
-  # install uv
+  if command -v uv >/dev/null 2>&1; then
+    echo "uv already installed"
+    return 0
+  fi
   curl -LsSf https://astral.sh/uv/install.sh | sh
 }
 
 function installFoundry() {
+  if [ -x "$HOME/.foundry/bin/forge" ]; then
+    echo "Foundry already installed"
+    return 0
+  fi
   curl -L https://foundry.paradigm.xyz | bash
-  ~/.foundry/bin/foundryup
-  # cast completions
-#  TODO: figure out why this doesn't work
-#  mkdir -p $HOME/.oh-my-zsh/completions
-#  cast completions zsh > $HOME/.oh-my-zsh/completions/_cast
+  "$HOME/.foundry/bin/foundryup"
 }
 
 function installBat() {
-  if [ "`uname -s`" == "Darwin" ]; then
-    brew install bat
+  if command -v bat >/dev/null 2>&1; then
+    echo "bat already installed"
+    return 0
+  fi
+  if [ "${machine}" = "${MACHINE_MAC}" ]; then
+    ensure_brew_package bat
   else
     source /etc/os-release
     if [ "$ID" = "amzn" ]; then
-        echo "skipping installation for Amazon Linux"
-        return 0
+      echo "skipping bat installation for Amazon Linux"
+      return 0
     fi
     eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y bat"
   fi
 }
 
 function installZoxide() {
-  # install zoxide
-  curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-  echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
-  echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.zshrc
-  echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
-  echo 'eval "$(zoxide init zsh)"' >> ~/.zshrc
+  if ! command -v zoxide >/dev/null 2>&1; then
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+  fi
+  ensure_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
+  ensure_line "$HOME/.zshrc" 'export PATH="$HOME/.local/bin:$PATH"'
+  ensure_line "$HOME/.bashrc" 'eval "$(zoxide init bash)"'
+  ensure_line "$HOME/.zshrc" 'eval "$(zoxide init zsh)"'
 }
 
 function installOhMyZsh() {
-  # install oh-my-zsh
+  if [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "oh-my-zsh already installed"
+    return 0
+  fi
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-  # less permissions on oh-my-zsh
   chmod -R 700 ~/.oh-my-zsh
 }
 
+function installZellijBinaryFallback() {
+  local version="v0.44.3"
+  local arch target asset url tmpdir
+  arch="$(uname -m)"
+  case "${arch}" in
+    arm64|aarch64) target="aarch64" ;;
+    x86_64|amd64) target="x86_64" ;;
+    *) echo "Unsupported architecture for zellij: ${arch}"; return 1 ;;
+  esac
+
+  if [ "${machine}" = "${MACHINE_MAC}" ]; then
+    asset="zellij-${target}-apple-darwin.tar.gz"
+  else
+    asset="zellij-${target}-unknown-linux-musl.tar.gz"
+  fi
+
+  url="https://github.com/zellij-org/zellij/releases/download/${version}/${asset}"
+  tmpdir="$(mktemp -d)"
+  curl -fsSL "$url" -o "${tmpdir}/zellij.tar.gz"
+  tar -xzf "${tmpdir}/zellij.tar.gz" -C "${tmpdir}"
+  mkdir -p "$HOME/.local/bin"
+  install -m 755 "${tmpdir}/zellij" "$HOME/.local/bin/zellij"
+  rm -rf "$tmpdir"
+}
+
+function installZellij() {
+  if ! command -v zellij >/dev/null 2>&1; then
+    if [ "${machine}" = "${MACHINE_MAC}" ]; then
+      ensure_homebrew
+      if brew list zellij >/dev/null 2>&1; then
+        :
+      elif ! brew install zellij; then
+        installZellijBinaryFallback
+      fi
+    else
+      installZellijBinaryFallback
+    fi
+  fi
+  setupZellij
+}
+
+function setupZellij() {
+  local repo_config="$HOME/${REPO_NAME}/${ZELLIJ_CONFIG}"
+  local target_config="$HOME/.config/zellij/config.kdl"
+
+  if [ ! -f "$repo_config" ]; then
+    echo "Missing zellij config at $repo_config"
+    return 1
+  fi
+
+  mkdir -p "$HOME/.config/zellij"
+  cp -f "$repo_config" "$target_config"
+
+  if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+    grep -v '^copy_command "pbcopy"$' "$target_config" > "${target_config}.tmp"
+    mv "${target_config}.tmp" "$target_config"
+  fi
+
+  ensure_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
+}
+
 function cloneRepo() {
-  # clone this repo:
   cd ~
-  git clone https://github.com/$USER_NAME/$REPO_NAME
+  if [ -d "$HOME/${REPO_NAME}/.git" ]; then
+    echo "Repository already cloned at ~/${REPO_NAME}"
+    return 0
+  fi
+  git clone "https://github.com/${USER_NAME}/${REPO_NAME}"
 }
 
 function setupVim() {
-  # Add shortcuts
-  echo "source ~/${REPO_NAME}/${NOPLUGINS_VIMRC}" >> ~/.vimrc
-  echo "source ~/${REPO_NAME}/${JETBRAINS_VIMRC}" >> ~/.ideavimrc
+  touch "$HOME/.vimrc" "$HOME/.ideavimrc"
 
-  # install vundle:
-  git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+  ensure_line "$HOME/.vimrc" "source ~/${REPO_NAME}/${NOPLUGINS_VIMRC}"
+  ensure_line "$HOME/.ideavimrc" "source ~/${REPO_NAME}/${JETBRAINS_VIMRC}"
 
-  # install vundle plugins:
-  echo "source ~/${REPO_NAME}/${VUNDLE_PLUGINS}" >> ~/.vimrc
-  # I had issues w this: https://github.com/VundleVim/Vundle.vim/issues/511
-  echo | vim +PluginInstall +qall
+  ensure_git_clone https://github.com/VundleVim/Vundle.vim.git "$HOME/.vim/bundle/Vundle.vim"
 
+  ensure_line "$HOME/.vimrc" "source ~/${REPO_NAME}/${VUNDLE_PLUGINS}"
+  echo | vim +PluginInstall +qall >/dev/null 2>&1 || true
 
-  # install plug
-  curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+  mkdir -p "$HOME/.vim/autoload"
+  if [ ! -f "$HOME/.vim/autoload/plug.vim" ]; then
+    curl -fLo "$HOME/.vim/autoload/plug.vim" --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  fi
 
-  # install plug plugins:
-  echo "source ~/${REPO_NAME}/${PLUG_PLUGINS}" >> ~/.vimrc
-  #vim +'PlugInstall --sync' +qa
-  echo | vim +'PlugInstall --sync' +qa
+  ensure_line "$HOME/.vimrc" "source ~/${REPO_NAME}/${PLUG_PLUGINS}"
+  echo | vim +PlugInstall --sync +qa >/dev/null 2>&1 || true
 
-  # install custom scripts
-  echo "source ~/${REPO_NAME}/${CUSTOM_VIM}" >> ~/.vimrc
+  ensure_line "$HOME/.vimrc" "source ~/${REPO_NAME}/${CUSTOM_VIM}"
 }
 
 function setupByobu() {
-  # to install byobu on amzn: https://blog.programster.org/amazon-linux-install-byobu
-
-  # set up byobu
   export BYOBU_BACKEND=tmux
+  mkdir -p "$HOME/.byobu"
 
-  # create & kill a session (to create the ~/.byobu directory)
-  byobu new-session -d -s temp
-  byobu kill-session -t temp
-  # create it anyways (in case the above doesn't work - it does not in docker ubuntu)
-  mkdir -p ~/.byobu
+  if command -v byobu >/dev/null 2>&1; then
+    byobu new-session -d -s temp 2>/dev/null || true
+    byobu kill-session -t temp 2>/dev/null || true
+    byobu-select-backend tmux 2>/dev/null || true
+    byobu-ctrl-a screen 2>/dev/null || true
+  fi
 
-  # install tmux plugins
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  ensure_git_clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+  ensure_line "$HOME/.byobu/keybindings.tmux" "source ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}"
+}
 
-  # select the backend & switch to screen
-  byobu-select-backend tmux
-  byobu-ctrl-a screen
+function setupITerm() {
+  if [ "${machine}" != "${MACHINE_MAC}" ]; then
+    echo "Skipping iTerm setup (not macOS)"
+    return 0
+  fi
 
-  # byobu keybinding config
-  echo "source ~/${REPO_NAME}/${BYOBU_KEYBINDINGS}" >> ~/.byobu/keybindings.tmux
+  local repo_root="$HOME/${REPO_NAME}"
+  local profile_src="${repo_root}/iterm/arshan_iterm_profile.json"
+  local keymap_src="${repo_root}/iterm/arshan_key_bindings.itermkeymap"
+  local dynamic_dir="${HOME}/Library/Application Support/iTerm2/DynamicProfiles"
+  local keymap_dir="${HOME}/Library/Application Support/iTerm2/Custom Key Bindings"
+
+  mkdir -p "$dynamic_dir" "$keymap_dir"
+
+  python3 - <<PY
+import json
+from pathlib import Path
+
+profile = json.loads(Path("${profile_src}").read_text())
+dynamic_path = Path("${dynamic_dir}") / "Arshan.json"
+dynamic_path.write_text(json.dumps({"Profiles": [profile]}, indent=2))
+PY
+
+  cp -f "$keymap_src" "${keymap_dir}/Arshan.itermkeymap"
+
+  cat <<EOF
+
+iTerm2 profile installed to:
+  ${dynamic_dir}/Arshan.json
+
+Key bindings copied to:
+  ${keymap_dir}/Arshan.itermkeymap
+
+Finish setup in iTerm2:
+  1. Quit and reopen iTerm2 (or reload Dynamic Profiles).
+  2. Preferences > Profiles > Arshan > Other Actions > Set as Default
+  3. Preferences > Keys > Presets > Import... > select Arshan.itermkeymap
+
+EOF
 }
 
 function configurePromptAndRcfiles() {
-  # general.arshrc commands
-  echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.zshrc
-  echo "source ~/${REPO_NAME}/${RCFILE}" >> ~/.bashrc
+  ensure_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
+  ensure_line "$HOME/.bashrc" "source ~/${REPO_NAME}/${RCFILE}"
+  ensure_line "$HOME/.bashrc" "source ~/${REPO_NAME}/${BASH_PROMPT}"
+  ensure_line "$HOME/.zshrc" "source ~/${REPO_NAME}/${RCFILE}"
 
   emojis=(🐳 🐸 🙈 🐶 🐥 🐝 🐞 🪲)
   emoji="${emojis[RANDOM % ${#emojis[@]}]}"
-  machine_title="$emoji-$1"
+  machine_title="$emoji-${USER_LABEL}"
 
-  # For unix-like systems, configure zsh prompt (without changing default shell)
-  if [ "${machine}" = "${MACHINE_LINUX}" ]; then
-    # NOTE: aws linux doesn't have this
-    # https://stackoverflow.com/questions/17126051/how-to-change-shell-on-amazon-ec2-linux-instance
-    # Removed: sudo chsh -s /bin/zsh `whoami`; # User doesn't want ZSH as default shell
-    sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="zhann"/' ~/.zshrc;
+  if [ "${machine}" = "${MACHINE_LINUX}" ] && [ -f "$HOME/.zshrc" ]; then
+    if grep -q 'ZSH_THEME="robbyrussell"' "$HOME/.zshrc"; then
+      sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="zhann"/' "$HOME/.zshrc"
+    fi
     preprompt='PROMPT="%(?:%{$fg_bold[green]%}%1{'
     postprompt='%} :%{$fg_bold[red]%}%1{➜%} ) %{$fg[cyan]%}%c%{$reset_color%} "'
     prompt="$preprompt$machine_title$postprompt"
-    echo $prompt >> ~/.zshrc;
+    ensure_line "$HOME/.zshrc" "$prompt"
   fi
 }
 
 function interactiveCommands() {
-  ##### password-requiring commands
-  # check if INTERACTIVE is set
   if [ -z "${INTERACTIVE}" ]; then
     echo "INTERACTIVE is not set, skipping password-requiring commands."
-    exit 0
+    return 0
   fi
 
-  # Removed: chsh -s $(which zsh) # User doesn't want ZSH as default shell
-
-  if [ "${machine}" = "${MACHINE_MAC}" ] &&
-     [ "${architecture}" != "${ARCHITECTURE_ARM64}" ]; then
-
-    # install homebrew
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-    # brew installations
-    brew install ctags the_silver_searcher
-
-    alias ctags="`brew --prefix`/bin/ctags"
-    alias ctags >> ~/$SHELL_RC_FILE
+  if [ "${machine}" = "${MACHINE_MAC}" ]; then
+    ensure_homebrew
+    ensure_brew_package ctags
+    ensure_brew_package the_silver_searcher
+    ensure_line "$HOME/${SHELL_RC_FILE}" 'alias ctags="$(brew --prefix)/bin/ctags"'
   fi
 }
 
@@ -246,10 +372,15 @@ function installAwsCli() {
 }
 
 function updatePackageManager() {
+  if [ "${machine}" = "${MACHINE_MAC}" ]; then
+    ensure_homebrew
+    return 0
+  fi
+
   export DEBIAN_FRONTEND=noninteractive
   export NEEDRESTART_MODE=a
   export NEEDRESTART_SUSPEND=1
-  
+
   case "${LINUX_INSTALLER}" in
     apt-get)
       sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 apt-get update -y
@@ -265,36 +396,42 @@ function updatePackageManager() {
       exit 1
       ;;
   esac
-  
+
   unset DEBIAN_FRONTEND
   unset NEEDRESTART_MODE
   unset NEEDRESTART_SUSPEND
 }
 
 function ensureJq() {
-  if [ -z "`command -v jq`" ]; then
-    # use the LINUX_INSTALLER to install - make fully non-interactive
+  if command -v jq >/dev/null 2>&1; then
+    return 0
+  fi
+  if [ "${machine}" = "${MACHINE_MAC}" ]; then
+    ensure_brew_package jq
+  else
     eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y jq"
   fi
 }
 
-
-
 function main() {
-  # installing jq, needed for stage utils
+  parseArgs "$@"
+
   updatePackageManager
   ensureJq
-  xst installPackages
-  xst installUV
-  xst installZoxide
-  xst installBat
-  xst installOhMyZsh
-  xst installFoundry
-  xst cloneRepo
-  xst setupVim
-  xst setupByobu
-  xst configurePromptAndRcfiles $1
-  xst interactiveCommands
+
+  runStage installPackages installPackages
+  runStage installUV installUV
+  runStage installZoxide installZoxide
+  runStage installBat installBat
+  runStage installOhMyZsh installOhMyZsh
+  runStage installFoundry installFoundry
+  runStage cloneRepo cloneRepo
+  runStage setupVim setupVim
+  runStage setupByobu setupByobu
+  runStage installZellij installZellij
+  runStage setupITerm setupITerm
+  runStage configurePromptAndRcfiles configurePromptAndRcfiles
+  runStage interactiveCommands interactiveCommands
 }
 
-main $1
+main "$@"
