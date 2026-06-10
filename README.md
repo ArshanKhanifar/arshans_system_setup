@@ -77,6 +77,7 @@ Running `profile_setup.sh` (all stages) installs and configures:
 - Zellij config at `~/.config/zellij/config.kdl` (redeployed on every profile setup run)
 - Zellij prefix (`Ctrl+Space` / `F12`): `c` new tab, `n`/`p` next/prev tab, `s`/`v` splits, `d` detach, `r` rename tab, `w` rename pane, `Alt+hjkl` resize, `[` scroll/copy
 - Zellij helpers (via `.arshrc`): `zat` fzf attach session, `znew <name>` new session, `zmv` fzf rename session, `zejrm` fzf multiselect kill sessions
+- Cheatsheets: `cheatsheet` / `cheatsheet <pattern>` — markdown sheets in `cheatsheets/` (zellij, byobu, shell, git, docker)
 - iTerm2 dynamic profile + keymap preset (macOS only)
 - Shell rc (always applied on every run, idempotent): `.bash_profile` sources `.bashrc`; `.bashrc`/`.zshrc` get `.arshrc`, `bash_prompt.sh`, fzf, zoxide init, Foundry on PATH, and `$HOME/.local/bin`
 
