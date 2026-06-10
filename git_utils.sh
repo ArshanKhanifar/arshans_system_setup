@@ -30,6 +30,21 @@ function gitpersonal() {
   git config --global --replace-all user.signingkey $signing_key;
 }
 
+function ensure_arshans_system_setup_git() {
+  local repo="${1:-$HOME/arshans_system_setup}"
+
+  if [[ ! -d "$repo/.git" ]]; then
+    echo "Not a git repo: $repo" >&2
+    return 1
+  fi
+
+  git -C "$repo" config --local user.name 'arshankhanifar'
+  git -C "$repo" config --local user.email 'arshankhanifar@gmail.com'
+  git -C "$repo" config --local core.hooksPath hooks
+  git -C "$repo" config --local core.sshCommand 'ssh -i ~/.ssh/arshan-gh-personal-m5 -o IdentitiesOnly=yes -F /dev/null'
+  git -C "$repo" remote set-url origin git@github.com:arshanKhanifar/arshans_system_setup.git
+}
+
 # qcom: "this is a quick commit"
 function qcom() {
     git commit -am "$1"

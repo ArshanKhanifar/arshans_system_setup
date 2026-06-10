@@ -60,8 +60,20 @@ keybinds clear-defaults=true {
         bind "z" { TogglePaneFrames; SwitchToMode "normal"; }
         bind "f" { ToggleFocusFullscreen; SwitchToMode "normal"; }
         bind "d" { Detach; }
+        bind "r" { SwitchToMode "RenameTab"; }
+        bind "w" { SwitchToMode "RenamePane"; }
 
         bind "Esc" { SwitchToMode "normal"; }
+        bind "Enter" { SwitchToMode "normal"; }
+    }
+
+    renametab {
+        bind "Esc" { UndoRenameTab; SwitchToMode "normal"; }
+        bind "Enter" { SwitchToMode "normal"; }
+    }
+
+    renamepane {
+        bind "Esc" { UndoRenamePane; SwitchToMode "normal"; }
         bind "Enter" { SwitchToMode "normal"; }
     }
 

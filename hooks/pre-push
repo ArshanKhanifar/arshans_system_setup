@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+remote_url="$(git remote get-url origin)"
+
+if [[ "$remote_url" != git@github.com:* && "$remote_url" != ssh://git@github.com/* ]]; then
+  echo "Refusing to push: origin must use SSH (git@github.com:owner/repo)." >&2
+  echo "Current origin: $remote_url" >&2
+  exit 1
+fi
+
+expected_ssh_command='ssh -i ~/.ssh/arshan-gh-personal-m5 -o IdentitiesOnly=yes -F /dev/null'
+actual_ssh_command="$(git config --local --get core.sshCommand || true)"
+
+if [[ "$actual_ssh_command" != "$expected_ssh_command" ]]; then
+  echo "Refusing to push: core.sshCommand must use the personal GitHub SSH key." >&2
+  echo "Expected: $expected_ssh_command" >&2
+  echo "Actual: ${actual_ssh_command:-<unset>}" >&2
+  exit 1
+fi

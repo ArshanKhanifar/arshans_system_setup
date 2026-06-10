@@ -542,6 +542,11 @@ function main() {
 
   # Always re-apply shell rc lines so reruns repair .bashrc/.zshrc after oh-my-zsh, etc.
   ensureShellRcfiles
+
+  # Always redeploy zellij config so reruns and repo updates propagate to ~/.config/zellij
+  if [ -f "$HOME/${REPO_NAME}/${ZELLIJ_CONFIG}" ]; then
+    setupZellij
+  fi
 }
 
 main "$@"

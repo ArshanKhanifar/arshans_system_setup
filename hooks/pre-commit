@@ -1,0 +1,38 @@
+#!/bin/bash
+set -euo pipefail
+
+REQUIRED_NAME="arshankhanifar"
+REQUIRED_EMAIL="arshankhanifar@gmail.com"
+
+parse_email() {
+  sed -n 's/.*<\([^>]*\)>.*/\1/p'
+}
+
+parse_name() {
+  sed -n 's/^\([^<]*\) <.*/\1/p' | sed 's/ $//'
+}
+
+check_ident() {
+  local role="$1"
+  local ident name email
+
+  ident="$(git var "GIT_${role}_IDENT")"
+  email="$(printf '%s\n' "$ident" | parse_email)"
+  name="$(printf '%s\n' "$ident" | parse_name)"
+
+  if [[ "$email" != "$REQUIRED_EMAIL" || "$name" != "$REQUIRED_NAME" ]]; then
+    echo "Refusing to commit in arshans_system_setup as '${name} <${email}>'." >&2
+    echo "Required identity: ${REQUIRED_NAME} <${REQUIRED_EMAIL}>." >&2
+    echo "Unset GIT_AUTHOR_* / GIT_COMMITTER_* or --author if you set them." >&2
+    exit 1
+  fi
+}
+
+if [[ "$(git config user.name)" != "$REQUIRED_NAME" || "$(git config user.email)" != "$REQUIRED_EMAIL" ]]; then
+  echo "Refusing to commit: local git user config must be personal identity." >&2
+  echo "Run: git config user.name '$REQUIRED_NAME' && git config user.email '$REQUIRED_EMAIL'" >&2
+  exit 1
+fi
+
+check_ident AUTHOR
+check_ident COMMITTER
