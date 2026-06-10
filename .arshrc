@@ -22,6 +22,7 @@ source "$ARSH_RC_DIR/sync_utils.sh"
 source "$ARSH_RC_DIR/prompt_utils.sh"
 source "$ARSH_RC_DIR/gcloud_utils.sh"
 source "$ARSH_RC_DIR/kubernetes_utils.sh"
+source "$ARSH_RC_DIR/zellij_utils.sh"
 
 # MacOS only
 [ -f /opt/homebrew/bin/brew ] && eval "`/opt/homebrew/bin/brew shellenv`"
