@@ -206,15 +206,14 @@ function installZellijBinaryFallback() {
 }
 
 function installZellij() {
-  if ! command -v zellij >/dev/null 2>&1; then
-    if [ "${machine}" = "${MACHINE_MAC}" ]; then
-      ensure_homebrew
-      if brew list zellij >/dev/null 2>&1; then
-        :
-      elif ! brew install zellij; then
-        installZellijBinaryFallback
-      fi
-    else
+  if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+    # Always install pinned release to ~/.local/bin so it wins over older system copies.
+    installZellijBinaryFallback
+  elif ! command -v zellij >/dev/null 2>&1; then
+    ensure_homebrew
+    if brew list zellij >/dev/null 2>&1; then
+      :
+    elif ! brew install zellij; then
       installZellijBinaryFallback
     fi
   fi
