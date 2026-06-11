@@ -58,6 +58,8 @@ Use **Alt+h/l** for horizontal resize in iTerm (Option+Left/Right is word-jump).
 - click + drag to select (pane-aware)
 - then **`y`** to copy (because `copy_on_select` is off)
 
+Over **SSH from your Mac**, copy uses OSC 52 (not the VM clipboard). iTerm must allow *Applications in terminal may access clipboard*.
+
 ### Keyboard (vim-style)
 
 Zellij has no tmux-style in-pane copy cursor. Use scrollback editor instead:

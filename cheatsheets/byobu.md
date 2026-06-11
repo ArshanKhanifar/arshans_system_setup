@@ -37,5 +37,7 @@ Enter: **`prefix + [`**
 | `h/j/k/l` | move cursor |
 | `v` | start selection |
 | `V` | rectangle selection |
-| `y` / `Y` | yank to system clipboard and exit |
+| `y` / `Y` | yank to clipboard and exit |
 | `q` / `Esc` | exit copy mode without yanking |
+
+Over **SSH**, yank uses OSC 52 to your Mac clipboard (iTerm: enable *Applications in terminal may access clipboard*).

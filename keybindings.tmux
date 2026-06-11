@@ -3,7 +3,6 @@
 
 # List of plugins
 set -g @plugin 'tmux-plugins/tpm'
-set -g @plugin 'tmux-plugins/tmux-yank'
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
 run '~/.tmux/plugins/tpm/tpm'
@@ -14,20 +13,24 @@ setw -g mode-keys vi
 # Enter copy mode (same as prefix+[ in stock tmux / Zellij scroll mode)
 bind [ copy-mode -e
 
+# OSC 52: over SSH into a VM, iTerm on your Mac receives the copy (not xclip on the remote).
+set -g set-clipboard on
+
 # Remap copy-mode-vi to start selection and yank like Vim
 bind-key -T copy-mode-vi 'v' send-keys -X begin-selection
 bind-key -T copy-mode-vi 'V' send-keys -X rectangle-toggle
 
-# System clipboard (tmux-yank also handles y; these are explicit fallbacks)
+# Linux / SSH: copy-selection-and-cancel + set-clipboard sends OSC 52 to iTerm on your Mac
+bind-key -T copy-mode-vi 'y' send-keys -X copy-selection-and-cancel
+bind-key -T copy-mode-vi 'Y' send-keys -X copy-selection-and-cancel
+
+# macOS local: pbcopy fallback
 if-shell 'test "$(uname)" = "Darwin"' \
   'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"' \
-  'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard 2>/dev/null || wl-copy"'
+  ''
 if-shell 'test "$(uname)" = "Darwin"' \
   'bind-key -T copy-mode-vi Y send-keys -X copy-pipe-and-cancel "pbcopy"' \
-  'bind-key -T copy-mode-vi Y send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard 2>/dev/null || wl-copy"'
-
-set -g @yank_action 'copy-pipe-and-cancel'
-set -g @yank_selection 'clipboard'
+  ''
 
 unbind-key -n C-b
 

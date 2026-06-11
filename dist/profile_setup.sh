@@ -325,12 +325,9 @@ function setupZellij() {
   cp -f "$repo_config" "$target_config"
 
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
+    # Drop macOS-only copy_command. Without it, Zellij uses OSC 52 so SSH sessions
+    # copy to your local terminal (iTerm) instead of the remote VM clipboard.
     grep -v '^copy_command "pbcopy"$' "$target_config" > "${target_config}.tmp"
-    if command -v wl-copy >/dev/null 2>&1; then
-      echo 'copy_command "wl-copy"' >> "${target_config}.tmp"
-    elif command -v xclip >/dev/null 2>&1; then
-      echo 'copy_command "xclip -selection clipboard"' >> "${target_config}.tmp"
-    fi
     mv "${target_config}.tmp" "$target_config"
   fi
 
