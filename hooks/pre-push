@@ -9,7 +9,7 @@ if [[ "$remote_url" != git@github.com:* && "$remote_url" != ssh://git@github.com
   exit 1
 fi
 
-expected_ssh_command='ssh -i ~/.ssh/arshan-gh-personal-m5 -o IdentitiesOnly=yes -F /dev/null'
+expected_ssh_command='ssh -i ~/.ssh/gh-arshankhanifar-m5 -o IdentitiesOnly=yes -F /dev/null'
 actual_ssh_command="$(git config --local --get core.sshCommand || true)"
 
 if [[ "$actual_ssh_command" != "$expected_ssh_command" ]]; then

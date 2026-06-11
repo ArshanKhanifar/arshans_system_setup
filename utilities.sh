@@ -35,7 +35,7 @@ Host $machine_name
     
     # Append to ~/.ssh/config
     echo "$config_entry" >> ~/.ssh/config
-    echo "$config_entry" >> ~/.ssh/config.personal
+    echo "$config_entry" >> ~/.ssh/config.arshan
     echo "$config_entry" >> ~/.ssh/config.ritual
     echo "✅ Added config entry for $machine_name"
     echo "You can now use: code --remote ssh-remote+$machine_name /path/to/directory"

@@ -3,11 +3,15 @@
 function gitritual() {
   cp ~/.ssh/config.ritual ~/.ssh/config;
   ssh-add -D;
+  ssh-add --apple-use-keychain ~/.ssh/gh-arshanritual-m5 2>/dev/null;
   email="arshan@ritual.net"
   git config --global user.name 'arshan-ritual';
   git config --global user.email $email;
-  signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
-  git config --global --replace-all user.signingkey $signing_key;
+  if command -v gpg >/dev/null 2>&1; then
+    signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
+    [ -n "$signing_key" ] && git config --global --replace-all user.signingkey $signing_key;
+  fi
+  command -v gh >/dev/null 2>&1 && gh auth switch --hostname github.com --user arshan-ritual;
 }
 
 function gitorigin() {
@@ -21,13 +25,17 @@ function gitorigin() {
 }
 
 function gitpersonal() {
-  cp ~/.ssh/config.personal ~/.ssh/config;
+  cp ~/.ssh/config.arshan ~/.ssh/config;
   ssh-add -D;
+  ssh-add --apple-use-keychain ~/.ssh/gh-arshankhanifar-m5 2>/dev/null;
   email="arshankhanifar@gmail.com"
   git config --global user.name 'arshankhanifar';
   git config --global user.email $email;
-  signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
-  git config --global --replace-all user.signingkey $signing_key;
+  if command -v gpg >/dev/null 2>&1; then
+    signing_key=`gpg --list-keys | grep -B 1 $email | head -n 1 | xargs`
+    [ -n "$signing_key" ] && git config --global --replace-all user.signingkey $signing_key;
+  fi
+  command -v gh >/dev/null 2>&1 && gh auth switch --hostname github.com --user ArshanKhanifar;
 }
 
 function ensure_arshans_system_setup_git() {
@@ -41,7 +49,7 @@ function ensure_arshans_system_setup_git() {
   git -C "$repo" config --local user.name 'arshankhanifar'
   git -C "$repo" config --local user.email 'arshankhanifar@gmail.com'
   git -C "$repo" config --local core.hooksPath hooks
-  git -C "$repo" config --local core.sshCommand 'ssh -i ~/.ssh/arshan-gh-personal-m5 -o IdentitiesOnly=yes -F /dev/null'
+  git -C "$repo" config --local core.sshCommand 'ssh -i ~/.ssh/gh-arshankhanifar-m5 -o IdentitiesOnly=yes -F /dev/null'
   git -C "$repo" remote set-url origin git@github.com:arshanKhanifar/arshans_system_setup.git
 }
 
