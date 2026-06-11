@@ -204,7 +204,7 @@ function installPackages() {
       if [ -f "/etc/needrestart/needrestart.conf" ]; then
         grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
       fi
-      eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y git zsh vim byobu make jq silversearcher-ag"
+      eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y git zsh vim byobu make jq silversearcher-ag xclip"
     fi
   else
     ensure_homebrew
@@ -326,6 +326,11 @@ function setupZellij() {
 
   if [ "${machine}" = "${MACHINE_LINUX}" ]; then
     grep -v '^copy_command "pbcopy"$' "$target_config" > "${target_config}.tmp"
+    if command -v wl-copy >/dev/null 2>&1; then
+      echo 'copy_command "wl-copy"' >> "${target_config}.tmp"
+    elif command -v xclip >/dev/null 2>&1; then
+      echo 'copy_command "xclip -selection clipboard"' >> "${target_config}.tmp"
+    fi
     mv "${target_config}.tmp" "$target_config"
   fi
 

@@ -30,7 +30,12 @@ Zellij uses the same bindings — see `cheatsheet zellij`.
 
 ## Copy mode (vi)
 
+Enter: **`prefix + [`**
+
 | Key | Action |
 |-----|--------|
+| `h/j/k/l` | move cursor |
 | `v` | start selection |
-| `y` / `Y` | yank and exit |
+| `V` | rectangle selection |
+| `y` / `Y` | yank to system clipboard and exit |
+| `q` / `Esc` | exit copy mode without yanking |

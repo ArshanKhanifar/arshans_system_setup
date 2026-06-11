@@ -53,14 +53,27 @@ Use **Alt+h/l** for horizontal resize in iTerm (Option+Left/Right is word-jump).
 
 ## Scroll / copy mode (`prefix + [`)
 
+### Mouse
+
+- click + drag to select (pane-aware)
+- then **`y`** to copy (because `copy_on_select` is off)
+
+### Keyboard (vim-style)
+
+Zellij has no tmux-style in-pane copy cursor. Use scrollback editor instead:
+
 | Key | Action |
 |-----|--------|
-| `j/k` | scroll down / up |
+| `v` or `e` | open scrollback in `$EDITOR` (vim) → select + yank there |
+| `j/k` or arrows | scroll down / up |
+| `h/l` | page up / down |
 | `d/u` | half page down / up |
 | `f/b` | page down / up |
 | `g/G` | top / bottom |
-| `y` / `Y` | yank selection |
+| `y` / `Y` | copy current mouse selection to clipboard |
 | `Esc` / `Enter` | exit scroll mode |
+
+In **Byobu/tmux**, use `prefix + [` then `v` → move → `y` (see `cheatsheet byobu`).
 
 ## Rename prompts
 

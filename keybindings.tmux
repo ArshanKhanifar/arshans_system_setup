@@ -11,10 +11,23 @@ run '~/.tmux/plugins/tpm/tpm'
 # Set Vim keybindings in copy mode
 setw -g mode-keys vi
 
-# Remap `copy-mode-vi` to start selection and yank like Vim
+# Enter copy mode (same as prefix+[ in stock tmux / Zellij scroll mode)
+bind [ copy-mode -e
+
+# Remap copy-mode-vi to start selection and yank like Vim
 bind-key -T copy-mode-vi 'v' send-keys -X begin-selection
-bind-key -T copy-mode-vi 'y' send-keys -X copy-selection-and-cancel
-bind-key -T copy-mode-vi 'Y' send-keys -X copy-selection-and-cancel
+bind-key -T copy-mode-vi 'V' send-keys -X rectangle-toggle
+
+# System clipboard (tmux-yank also handles y; these are explicit fallbacks)
+if-shell 'test "$(uname)" = "Darwin"' \
+  'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"' \
+  'bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard 2>/dev/null || wl-copy"'
+if-shell 'test "$(uname)" = "Darwin"' \
+  'bind-key -T copy-mode-vi Y send-keys -X copy-pipe-and-cancel "pbcopy"' \
+  'bind-key -T copy-mode-vi Y send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard 2>/dev/null || wl-copy"'
+
+set -g @yank_action 'copy-pipe-and-cancel'
+set -g @yank_selection 'clipboard'
 
 unbind-key -n C-b
 
