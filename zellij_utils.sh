@@ -1,5 +1,13 @@
 #!/bin/bash
 
+function zellij() {
+  if [ -x "$HOME/.local/bin/zellij" ]; then
+    command "$HOME/.local/bin/zellij" "$@"
+  else
+    command zellij "$@"
+  fi
+}
+
 function _zellij_require() {
   if ! command -v zellij >/dev/null 2>&1; then
     echo "zellij not found"

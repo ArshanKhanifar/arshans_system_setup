@@ -51,16 +51,22 @@ Use **Alt+h/l** for horizontal resize in iTerm (Option+Left/Right is word-jump).
 - drag pane borders to resize (frames must be visible — `prefix+z` toggles)
 - click to focus panes / tabs
 
+## Copy / paste over SSH (iTerm → Zellij on a VM)
+
+**`Cmd+C` does not copy Zellij mouse selections.** Zellij keeps its own selection; iTerm only sees its own.
+
+| Method | How |
+|--------|-----|
+| **Mouse (recommended)** | click + drag to select → **release** → auto-copies to your Mac (`copy_on_select`) |
+| **Shift + drag** | bypass Zellij → iTerm selection → **`Cmd+C`** works (not pane-aware) |
+| **Scroll mode** | `prefix + [` → select → **`y`** |
+| **Keyboard vim-style** | `prefix + [` → **`v`** → edit scrollback in vim → yank |
+
+iTerm: enable *Applications in terminal may access clipboard* (OSC 52 over SSH).
+
+Over SSH, Linux Zellij must **not** use `xclip` — it uses OSC 52 to your Mac clipboard.
+
 ## Scroll / copy mode (`prefix + [`)
-
-### Mouse
-
-- click + drag to select (pane-aware)
-- then **`y`** to copy (because `copy_on_select` is off)
-
-Over **SSH from your Mac**, copy uses OSC 52 (not the VM clipboard). iTerm must allow *Applications in terminal may access clipboard*.
-
-### Keyboard (vim-style)
 
 Zellij has no tmux-style in-pane copy cursor. Use scrollback editor instead:
 
