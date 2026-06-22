@@ -107,6 +107,7 @@ JETBRAINS_VIMRC="arshan_jetbrains.ideavimrc"
 VUNDLE_PLUGINS="vundle_plugins.vim"
 CUSTOM_VIM="custom.vim"
 PLUG_PLUGINS="plug.vim"
+FZF_CONFIG_VIM="fzf_config.vim"
 BYOBU_KEYBINDINGS="keybindings.tmux"
 ZELLIJ_CONFIG="zellij_config.kdl"
 SHELL_RC_FILE=".zshrc"
@@ -204,7 +205,7 @@ function installPackages() {
       if [ -f "/etc/needrestart/needrestart.conf" ]; then
         grep -qxF "\$nrconf{restart} = 'a'" /etc/needrestart/needrestart.conf || echo "\$nrconf{restart} = 'a'" | sudo tee -a /etc/needrestart/needrestart.conf
       fi
-      eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y git zsh vim byobu make jq silversearcher-ag xclip"
+      eval "sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a NEEDRESTART_SUSPEND=1 ${LINUX_INSTALLER} install -y git zsh vim byobu make jq silversearcher-ag ripgrep fd-find universal-ctags xclip"
     fi
   else
     ensure_homebrew
@@ -215,6 +216,9 @@ function installPackages() {
     ensure_brew_package make
     ensure_brew_package jq
     ensure_brew_package the_silver_searcher
+    ensure_brew_package ripgrep
+    ensure_brew_package fd
+    ensure_brew_package universal-ctags
     ensure_brew_package gnu-sed
   fi
 
@@ -362,6 +366,7 @@ function setupVim() {
   ensure_line "$HOME/.vimrc" "source ~/${REPO_NAME}/${PLUG_PLUGINS}"
   echo | vim +PlugInstall --sync +qa >/dev/null 2>&1 || true
 
+  ensure_line "$HOME/.vimrc" "source ~/${REPO_NAME}/${FZF_CONFIG_VIM}"
   ensure_line "$HOME/.vimrc" "source ~/${REPO_NAME}/${CUSTOM_VIM}"
 }
 
@@ -433,12 +438,14 @@ function ensureShellRcfiles() {
   ensure_line "$HOME/.bashrc" '# Keep uv-managed Python ahead of Homebrew after .arshrc loads brew shellenv'
   ensure_line "$HOME/.bashrc" 'export PATH="$HOME/.local/bin:$PATH"'
   ensure_line "$HOME/.bashrc" '[ -f ~/.fzf.bash ] && source ~/.fzf.bash'
+  ensure_line "$HOME/.bashrc" "source ~/${REPO_NAME}/fzf_env.sh"
   ensure_line "$HOME/.bashrc" 'eval "$(zoxide init bash)"'
   ensure_line "$HOME/.bashrc" 'export PATH="$PATH:$HOME/.foundry/bin"'
 
   ensure_line "$HOME/.zshrc" 'export PATH="$HOME/.local/bin:$PATH"'
   ensure_line "$HOME/.zshrc" "source ~/${REPO_NAME}/${RCFILE}"
   ensure_line "$HOME/.zshrc" '[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh'
+  ensure_line "$HOME/.zshrc" "source ~/${REPO_NAME}/fzf_env.sh"
   ensure_line "$HOME/.zshrc" 'eval "$(zoxide init zsh)"'
   ensure_line "$HOME/.zshrc" 'export PATH="$PATH:$HOME/.foundry/bin"'
 }
@@ -469,9 +476,7 @@ function interactiveCommands() {
 
   if [ "${machine}" = "${MACHINE_MAC}" ]; then
     ensure_homebrew
-    ensure_brew_package ctags
-    ensure_brew_package the_silver_searcher
-    ensure_line "$HOME/${SHELL_RC_FILE}" 'alias ctags="$(brew --prefix)/bin/ctags"'
+    ensure_line "$HOME/${SHELL_RC_FILE}" 'command -v brew >/dev/null && alias ctags="$(brew --prefix universal-ctags)/bin/ctags"'
   fi
 }
 

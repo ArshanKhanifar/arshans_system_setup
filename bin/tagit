@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+# Generate a ctags tags file, excluding paths from .gitignore + language defaults.
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+tagit — run ctags -R with gitignore-aware excludes
+
+Usage:
+  tagit [directory]       generate tags in directory (default: git root or cwd)
+  tagit -b [directory]    same, but run in background
+  tagit -n [directory]    print ctags command without running
+  tagit --help
+
+Reads .gitignore files under the repo, .git/info/exclude, and git core.excludesfile.
+Always adds common excludes for JS/TS, Python, C/C++, and Rust projects.
+EOF
+}
+
+BACKGROUND=0
+DRY_RUN=0
+TARGET="."
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -b|--background) BACKGROUND=1; shift ;;
+    -n|--dry-run) DRY_RUN=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    -*) echo "unknown option: $1" >&2; usage >&2; exit 1 ;;
+    *) TARGET="$1"; shift ;;
+  esac
+done
+
+if [[ ! -d "$TARGET" ]]; then
+  echo "tagit: not a directory: $TARGET" >&2
+  exit 1
+fi
+
+TARGET="$(cd "$TARGET" && pwd)"
+
+EXCLUDES=()
+
+exclude_seen() {
+  local candidate="$1"
+  local existing
+  ((${#EXCLUDES[@]})) || return 1
+  for existing in "${EXCLUDES[@]}"; do
+    [[ "$existing" == "$candidate" ]] && return 0
+  done
+  return 1
+}
+
+add_exclude() {
+  local pat="${1:-}"
+  pat="${pat%%#*}"
+  pat="${pat%"${pat##*[![:space:]]}"}"
+  pat="${pat#"${pat%%[![:space:]]*}"}"
+  [[ -z "$pat" ]] && return 0
+  [[ "$pat" == \!* ]] && return 0
+
+  pat="${pat%/}"
+  pat="${pat#./}"
+  pat="${pat#/}"
+  pat="${pat#**/}"
+
+  [[ -z "$pat" ]] && return 0
+  [[ "$pat" == "." ]] && return 0
+
+  if exclude_seen "$pat"; then
+    return 0
+  fi
+  EXCLUDES+=("$pat")
+}
+
+DEFAULT_EXCLUDES=(
+  .git
+  node_modules
+  target
+  vendor
+  dist
+  build
+  out
+  .tox
+  .venv
+  venv
+  __pycache__
+  .pytest_cache
+  .mypy_cache
+  .ruff_cache
+  .nox
+  .hypothesis
+  .next
+  .nuxt
+  .turbo
+  .svelte-kit
+  .parcel-cache
+  coverage
+  htmlcov
+  .pnpm-store
+  bower_components
+  cmake-build-debug
+  cmake-build-release
+  CMakeFiles
+  .gradle
+  .idea
+  .vscode
+  .DS_Store
+  '*.egg-info'
+  '*.o'
+  '*.a'
+  '*.so'
+  '*.dylib'
+  '*.pyc'
+  '*.pyo'
+  '*.class'
+  '*.wasm'
+)
+
+parse_gitignore_file() {
+  local file="$1"
+  [[ -f "$file" ]] || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    add_exclude "$line"
+  done < "$file"
+}
+
+WORK_DIR="$TARGET"
+if git -C "$TARGET" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  WORK_DIR="$(git -C "$TARGET" rev-parse --show-toplevel)"
+fi
+
+if [[ -d "$WORK_DIR/.git" ]]; then
+  parse_gitignore_file "$WORK_DIR/.git/info/exclude"
+  excludes_file="$(git -C "$WORK_DIR" config --get core.excludesfile 2>/dev/null || true)"
+  if [[ -n "$excludes_file" ]]; then
+    excludes_file="${excludes_file/#\~/$HOME}"
+    parse_gitignore_file "$excludes_file"
+  fi
+fi
+
+while IFS= read -r -d '' gitignore; do
+  parse_gitignore_file "$gitignore"
+done < <(find "$WORK_DIR" -name .gitignore -not -path '*/.git/*' -print0 2>/dev/null)
+
+for pat in "${DEFAULT_EXCLUDES[@]}"; do
+  add_exclude "$pat"
+done
+
+if ! command -v ctags >/dev/null 2>&1; then
+  echo "tagit: ctags not found (install universal-ctags)" >&2
+  exit 1
+fi
+
+CTAGS_CMD=(ctags -R --fields=+ln)
+for pat in "${EXCLUDES[@]}"; do
+  CTAGS_CMD+=(--exclude="$pat")
+done
+CTAGS_CMD+=(.)
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  echo "(cd $(printf '%q' "$WORK_DIR") && $(printf '%q ' "${CTAGS_CMD[@]}"))"
+  exit 0
+fi
+
+run_tagit() {
+  (
+    cd "$WORK_DIR"
+    exec "${CTAGS_CMD[@]}"
+  )
+}
+
+if [[ "$BACKGROUND" -eq 1 ]]; then
+  nohup bash -c "cd $(printf '%q' "$WORK_DIR") && $(printf '%q ' "${CTAGS_CMD[@]}")" >/dev/null 2>&1 &
+  echo "tagit: running in background (pid $!) in $WORK_DIR"
+  exit 0
+fi
+
+run_tagit
